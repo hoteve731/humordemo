@@ -16,6 +16,15 @@ class ConsoleLogger {
     init() {
         this.commandInput.addEventListener('input', () => this.onInputChange());
         this.commandInput.addEventListener('keydown', (e) => this.onKeyDown(e));
+
+        // Typing sound on each keystroke
+        this.commandInput.addEventListener('keypress', (e) => {
+            if (this.inputEnabled && e.key !== 'Enter' && e.key !== 'Tab') {
+                if (typeof audioSystem !== 'undefined' && audioSystem.initialized) {
+                    audioSystem.playHihat();
+                }
+            }
+        });
     }
 
     log(message, type = 'normal', instant = false) {
