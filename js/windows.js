@@ -208,6 +208,46 @@ class WindowManager {
         return pieces;
     }
 
+    // Split window into NUMBERED pieces (1-4) for interactive puzzle
+    splitIntoPuzzleNumbered(win) {
+        const pieces = [];
+        const cols = 2;
+        const rows = 2;
+        const pieceW = win.width / cols;
+        const pieceH = win.height / rows;
+
+        // Pieces in order 1, 2, 3, 4 (top-left, top-right, bottom-left, bottom-right)
+        const positions = [
+            { r: 0, c: 0 }, // 1
+            { r: 0, c: 1 }, // 2
+            { r: 1, c: 0 }, // 3
+            { r: 1, c: 1 }  // 4
+        ];
+
+        for (let i = 0; i < 4; i++) {
+            const { r, c } = positions[i];
+
+            // Scatter pieces around the screen
+            const scatterX = (Math.random() - 0.5) * 400 + (i % 2 === 0 ? -200 : 200);
+            const scatterY = (Math.random() - 0.5) * 300 + (i < 2 ? -150 : 150);
+
+            pieces.push({
+                number: i + 1,
+                origX: win.x + c * pieceW,
+                origY: win.y + r * pieceH,
+                x: win.x + win.width / 2 + scatterX,
+                y: win.y + win.height / 2 + scatterY,
+                width: pieceW,
+                height: pieceH,
+                rotation: (Math.random() - 0.5) * 0.8,
+                placed: false
+            });
+        }
+
+        win.pieces = pieces;
+        return pieces;
+    }
+
     // Animate puzzle pieces back together
     async animatePuzzleReassemble(win) {
         if (!win.pieces) return;
@@ -241,11 +281,30 @@ class WindowManager {
             p.translate(piece.x + piece.width / 2, piece.y + piece.height / 2);
             p.rotate(piece.rotation);
 
+            // Glow for unplaced pieces
+            if (!piece.placed && piece.number) {
+                p.drawingContext.shadowBlur = 15;
+                p.drawingContext.shadowColor = '#00d4ff';
+            }
+
+            // Piece body
             p.fill(26, 26, 46);
             p.stroke(60, 60, 100);
             p.strokeWeight(2);
             p.rect(-piece.width / 2, -piece.height / 2, piece.width, piece.height, 4);
 
+            // Number label if numbered puzzle
+            if (piece.number && !piece.placed) {
+                p.fill(0, 212, 255);
+                p.noStroke();
+                p.textSize(32);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.textStyle(p.BOLD);
+                p.text(piece.number, 0, 0);
+                p.textStyle(p.NORMAL);
+            }
+
+            p.drawingContext.shadowBlur = 0;
             p.pop();
         });
     }

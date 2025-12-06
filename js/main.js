@@ -12,6 +12,9 @@ function setup() {
     // Set up text
     textFont('Segoe UI, sans-serif');
 
+    // Initialize console system
+    systemConsole.init();
+
     // Initialize cursor position
     fakeCursor.setPosition(100, 100);
 
@@ -53,13 +56,20 @@ function draw() {
         }
     });
 
-    // Draw maze
-    obstacleManager.drawMaze(this);
+    // Draw ghost path (behind everything)
+    if (fakeCursor.showGhost && fakeCursor.ghostStart && fakeCursor.ghostEnd) {
+        fakeCursor.drawGhostPath(this,
+            fakeCursor.ghostStart.x, fakeCursor.ghostStart.y,
+            fakeCursor.ghostEnd.x, fakeCursor.ghostEnd.y);
+    }
 
-    // Draw windows
+    // Draw windows FIRST (behind maze)
     windowManager.draw(this);
 
-    // Draw puzzle pieces if any
+    // Draw maze IN FRONT of windows
+    obstacleManager.drawMaze(this);
+
+    // Draw puzzle pieces if any (on top of maze)
     windowManager.windows.forEach(win => {
         if (win.pieces) {
             windowManager.drawPuzzlePieces(this, win);
@@ -69,17 +79,10 @@ function draw() {
     // Draw math overlay
     obstacleManager.drawMathOverlay(this);
 
-    // Draw ghost path
-    if (fakeCursor.showGhost && fakeCursor.ghostStart && fakeCursor.ghostEnd) {
-        fakeCursor.drawGhostPath(this,
-            fakeCursor.ghostStart.x, fakeCursor.ghostStart.y,
-            fakeCursor.ghostEnd.x, fakeCursor.ghostEnd.y);
-    }
-
     // Draw trail
     fakeCursor.drawTrail(this);
 
-    // Draw cursor
+    // Draw cursor (always on top)
     fakeCursor.draw(this);
 }
 

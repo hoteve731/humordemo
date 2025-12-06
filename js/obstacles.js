@@ -59,6 +59,107 @@ class ObstacleManager {
         return this.mazeWalls;
     }
 
+    // Complex maze for Phase 2 - denser, more obstacles
+    generateComplexMaze(targetX, targetY, radius = 200) {
+        this.mazeWalls = [];
+        this.mazeZIndex = 50; // Draw in front of windows
+
+        const cellSize = 25;
+        const cols = Math.floor(radius * 2.5 / cellSize);
+        const rows = Math.floor(radius * 2.5 / cellSize);
+        const startX = targetX - radius * 1.2;
+        const startY = targetY - radius * 1.2;
+
+        // Create outer boundary walls
+        for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2;
+            const bx = targetX + Math.cos(angle) * (radius * 0.8);
+            const by = targetY + Math.sin(angle) * (radius * 0.8);
+
+            this.mazeWalls.push({
+                x: bx - 40,
+                y: by - 5,
+                width: 80,
+                height: 10,
+                rotation: angle
+            });
+        }
+
+        // Dense inner maze
+        for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < rows; j++) {
+                const x = startX + i * cellSize;
+                const y = startY + j * cellSize;
+
+                // Skip center area (target zone)
+                const distToCenter = Math.sqrt(
+                    Math.pow(x + cellSize / 2 - targetX, 2) +
+                    Math.pow(y + cellSize / 2 - targetY, 2)
+                );
+                if (distToCenter < 35) continue;
+
+                // Skip if too far
+                if (distToCenter > radius * 1.3) continue;
+
+                // Higher density wall creation
+                const pattern = (i * 7 + j * 11) % 5;
+
+                if (pattern === 0 || pattern === 2) {
+                    // Horizontal walls
+                    this.mazeWalls.push({
+                        x: x,
+                        y: y,
+                        width: cellSize * (Math.random() > 0.5 ? 1.5 : 1),
+                        height: 6
+                    });
+                }
+
+                if (pattern === 1 || pattern === 3) {
+                    // Vertical walls
+                    this.mazeWalls.push({
+                        x: x,
+                        y: y,
+                        width: 6,
+                        height: cellSize * (Math.random() > 0.5 ? 1.5 : 1)
+                    });
+                }
+
+                // Add some L-shaped obstacles
+                if (pattern === 4 && Math.random() > 0.4) {
+                    this.mazeWalls.push({
+                        x: x,
+                        y: y,
+                        width: cellSize,
+                        height: 6
+                    });
+                    this.mazeWalls.push({
+                        x: x,
+                        y: y,
+                        width: 6,
+                        height: cellSize
+                    });
+                }
+            }
+        }
+
+        // Add some diagonal barriers
+        for (let k = 0; k < 8; k++) {
+            const angle = (k / 8) * Math.PI * 2 + Math.PI / 8;
+            const dist = radius * (0.4 + Math.random() * 0.4);
+            const bx = targetX + Math.cos(angle) * dist;
+            const by = targetY + Math.sin(angle) * dist;
+
+            this.mazeWalls.push({
+                x: bx - 25,
+                y: by - 4,
+                width: 50,
+                height: 8
+            });
+        }
+
+        return this.mazeWalls;
+    }
+
     // Simple pathfinding through maze
     findPath(startX, startY, endX, endY) {
         const path = [];
