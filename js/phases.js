@@ -110,21 +110,14 @@ class PhaseManager {
 
         await systemConsole.logSequence([
             { text: '명령 수신: spawn_window + inject_obstacles', type: 'system' },
-            { text: '새 창 생성 중...', type: 'dim' },
+            { text: '장애물 생성 중...', type: 'dim' },
         ], 400);
 
-        // Create new window in center
+        // Window position (but don't create yet)
         const winX = window.innerWidth / 2 - 150;
         const winY = window.innerHeight / 2 - 100;
         const winW = 300;
         const winH = 200;
-
-        const win = windowManager.createWindow(winX, winY, winW, winH, 'Window_B.exe');
-        await windowManager.animateAppear(win);
-
-        const closeBtn = windowManager.getCloseButtonCenter(win);
-
-        await this.delay(600);
 
         // Detailed obstacle injection logs
         await systemConsole.logSequence([
@@ -134,8 +127,17 @@ class PhaseManager {
             { text: '└─ 장애물 배치 완료', type: 'dim' },
         ], 350);
 
-        // Generate square maze around window with pre-calculated path
+        // Generate MAZE FIRST (before window)
         obstacleManager.generateSquareMaze(winX, winY, winW, winH);
+
+        await this.delay(500);
+
+        // NOW create window INSIDE the maze
+        await systemConsole.typeMessageAsync('창 생성 중...', 'dim');
+        const win = windowManager.createWindow(winX, winY, winW, winH, 'Window_B.exe');
+        await windowManager.animateAppear(win);
+
+        const closeBtn = windowManager.getCloseButtonCenter(win);
 
         // Set cursor at maze entry point (bottom-left outside maze)
         const entryX = winX - 100;
@@ -250,16 +252,17 @@ class PhaseManager {
             { text: '└─ 조각 4/4 분리', type: 'dim' },
         ], 300);
 
+        // Create window but DON'T show it - only pieces will be visible
         const win = windowManager.createWindow(
             window.innerWidth / 2 - 150,
             window.innerHeight / 2 - 100,
             300, 200, 'Puzzle.dll'
         );
-        await windowManager.animateAppear(win);
-        await this.delay(500);
+        win.visible = false; // Start invisible
+        win.opacity = 1;
+        win.scale = 1;
 
-        // Split into numbered pieces
-        win.visible = false;
+        // Split into numbered pieces (pieces will be visible, window stays invisible)
         const pieces = windowManager.splitIntoPuzzleNumbered(win);
 
         await this.delay(500);
@@ -453,7 +456,7 @@ class PhaseManager {
         await this.runPhase5();
     }
 
-    // ==================== PHASE 5: TRANSCEND - Fast Integrated Finale ====================
+    // ==================== PHASE 5: TRANSCEND - Jazz Band Finale ====================
     async runPhase5() {
         // Disable input immediately to prevent repeat
         systemConsole.disableInput();
@@ -461,59 +464,116 @@ class PhaseManager {
 
         await systemConsole.logSequence([
             { text: '★ TRANSCEND MODE ACTIVATED ★', type: 'success' },
-            { text: '모든 장애물 동시 발동 중...', type: 'system' },
-            { text: 'BPM: 180 | 요소: MAZE + MATH + PUZZLE', type: 'dim' }
-        ], 300);
+            { text: 'JAZZ MODE: 미로=베이스 | 수학=하이햇 | 퍼즐=스네어', type: 'system' },
+            { text: 'BPM: 200+ | 가속 중...', type: 'dim' }
+        ], 250);
 
         fakeCursor.clearTrail();
         fakeCursor.setTrailPhase('rainbow');
         fakeCursor.trailPersistent = true;
-        fakeCursor.maxTrailLength = 3000;
+        fakeCursor.maxTrailLength = 4000;
 
-        // FAST TRANSCEND SEQUENCE - 30 rapid popups with all elements
-        const elementTypes = ['MAZE', 'MATH', 'PUZZLE', 'WINDOW'];
-        const popupCount = 25;
+        // JAZZ BAND FINALE - Different elements with different rhythms
+        const totalBeats = 30;
 
-        for (let i = 0; i < popupCount; i++) {
-            // Speed increases as we progress
-            const speedFactor = Math.max(0.1, 0.25 - (i * 0.005));
+        for (let beat = 0; beat < totalBeats; beat++) {
+            // Speed increases throughout
+            const baseSpeed = Math.max(0.08, 0.2 - (beat * 0.004));
+            const pauseTime = Math.max(30, 120 - (beat * 3));
 
-            // Random position
-            const x = Math.random() * (window.innerWidth - 200) + 100;
-            const y = Math.random() * (window.innerHeight - 200) + 100;
-            const type = elementTypes[i % 4];
+            // JAZZ PATTERN: Different instruments on different beats
+            const beatType = beat % 8;
 
-            const win = windowManager.createWindow(x, y, 120, 80, type);
-            win.glowing = true;
-            await windowManager.animateAppear(win);
+            const x = Math.random() * (window.innerWidth - 250) + 125;
+            const y = Math.random() * (window.innerHeight - 250) + 125;
 
-            // Different sounds for different types - creating rhythm
-            switch (i % 4) {
-                case 0: audioSystem.playBass(); break;     // MAZE
-                case 1: audioSystem.playHihat(); break;    // MATH
-                case 2: audioSystem.playSnare(); break;    // PUZZLE
-                case 3: audioSystem.playClap(); break;     // WINDOW
+            if (beatType === 0 || beatType === 4) {
+                // === BASS (Maze) - Strong beats 1 & 5 ===
+                // Create small maze walls briefly
+                const mazeWalls = [];
+                for (let w = 0; w < 4; w++) {
+                    mazeWalls.push({
+                        x: x + (w % 2) * 60 - 30,
+                        y: y + Math.floor(w / 2) * 40 - 20,
+                        width: 50,
+                        height: 8
+                    });
+                }
+                obstacleManager.mazeWalls = mazeWalls;
+                audioSystem.playBass();
+
+                const win = windowManager.createWindow(x, y, 100, 60, '▓▓▓');
+                win.glowing = true;
+                await windowManager.animateAppear(win);
+
+                const closeBtn = windowManager.getCloseButtonCenter(win);
+                fakeCursor.setTarget(closeBtn.x, closeBtn.y);
+                await fakeCursor.moveToTarget(baseSpeed);
+
+                audioSystem.playBlip();
+                await windowManager.animateClose(win);
+                windowManager.removeWindow(win.id);
+                obstacleManager.mazeWalls = [];
+
+            } else if (beatType === 2 || beatType === 6) {
+                // === SNARE (Puzzle) - Beats 3 & 7 ===
+                // Flash 4 small puzzle pieces
+                const win = windowManager.createWindow(x, y, 80, 80, '◈');
+                win.visible = false;
+                const pieces = windowManager.splitIntoPuzzleNumbered(win);
+
+                audioSystem.playSnare();
+
+                // Quick click through pieces
+                for (let p = 0; p < 4; p++) {
+                    const piece = pieces[p];
+                    fakeCursor.setTarget(piece.x + piece.width / 2, piece.y + piece.height / 2);
+                    await fakeCursor.moveToTarget(baseSpeed * 0.5);
+                    audioSystem.playClap();
+
+                    // Snap piece back
+                    gsap.to(piece, {
+                        x: piece.origX,
+                        y: piece.origY,
+                        rotation: 0,
+                        duration: 0.15
+                    });
+                }
+
+                win.pieces = null;
+                windowManager.removeWindow(win.id);
+
+            } else if (beatType === 1 || beatType === 3 || beatType === 5 || beatType === 7) {
+                // === HI-HAT (Math) - Off-beats ===
+                const a = Math.floor(Math.random() * 50) + 10;
+                const b = Math.floor(Math.random() * 50) + 10;
+                const formula = `${a}+${b}`;
+
+                const win = windowManager.createWindow(x, y, 90, 50, formula);
+                win.glowing = true;
+                await windowManager.animateAppear(win);
+
+                audioSystem.playHihat();
+
+                const closeBtn = windowManager.getCloseButtonCenter(win);
+                fakeCursor.setTarget(closeBtn.x, closeBtn.y);
+                await fakeCursor.moveToTarget(baseSpeed * 0.7);
+
+                // Show answer briefly
+                win.title = `=${a + b}`;
+                audioSystem.playDigital();
+
+                await this.delay(50);
+                await windowManager.animateClose(win);
+                windowManager.removeWindow(win.id);
             }
 
-            // Cursor rushes to X button
-            const closeBtn = windowManager.getCloseButtonCenter(win);
-            fakeCursor.setTarget(closeBtn.x, closeBtn.y);
-            await fakeCursor.moveToTarget(speedFactor);
-
-            // Click sound
-            audioSystem.playBlip();
-
-            // Close immediately
-            await windowManager.animateClose(win);
-            windowManager.removeWindow(win.id);
-
-            // Faster and faster rhythm
-            await this.delay(Math.max(50, 150 - (i * 4)));
+            await this.delay(pauseTime);
         }
 
-        // CLIMAX - All at once
-        await this.delay(500);
-
+        // FINALE CRESCENDO - All at once!
+        await this.delay(300);
+        audioSystem.playSuccess();
         await systemConsole.typeMessageAsync('... ... ...', 'dim');
 
         await this.delay(1000);

@@ -180,8 +180,16 @@ class ConsoleLogger {
         // Update placeholder to show remaining text
         if (inputValue.length > 0 && expected.startsWith(inputValue)) {
             this.commandPlaceholder.textContent = expected.substring(inputValue.length);
+
+            // Calculate input text width and position placeholder after it
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            context.font = '14px "Fira Code", Consolas, monospace';
+            const textWidth = context.measureText(inputValue).width;
+            this.commandPlaceholder.style.left = (22 + textWidth) + 'px';
         } else if (inputValue.length === 0) {
             this.commandPlaceholder.textContent = expected;
+            this.commandPlaceholder.style.left = '22px';
         } else {
             this.commandPlaceholder.textContent = '';
         }
