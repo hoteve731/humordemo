@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System: IMPROV</title>
+    <meta name="description" content="기계적 효율에서 예술적 비효율로의 변화를 시각화하는 인터랙티브 데모">
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Layer 1: Console Log (Bottom) -->
+    <div id="console-log">
+        <div id="console-content"></div>
+    </div>
+    
+    <!-- Layer 2 & 3: Canvas layers managed by p5.js -->
+    <div id="canvas-container"></div>
+    
+    <!-- Start Overlay -->
+    <div id="start-overlay">
+        <div class="start-content">
+            <h1>System: IMPROV</h1>
+            <p>기계적 효율 → 예술적 비효율</p>
+            <button id="start-btn">▶ EXECUTE</button>
+            <p class="hint">오디오가 포함되어 있습니다</p>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/console.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/cursor.js"></script>
+    <script src="js/windows.js"></script>
+    <script src="js/obstacles.js"></script>
+    <script src="js/phases.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
