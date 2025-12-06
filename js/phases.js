@@ -109,48 +109,50 @@ class PhaseManager {
             { text: '새 창 생성 중...', type: 'dim' },
         ], 400);
 
-        // Create new window
-        const win = windowManager.createWindow(
-            window.innerWidth / 2 - 150,
-            window.innerHeight / 2 - 100,
-            300, 200, 'Window_B.exe'
-        );
+        // Create new window in center
+        const winX = window.innerWidth / 2 - 150;
+        const winY = window.innerHeight / 2 - 100;
+        const winW = 300;
+        const winH = 200;
+
+        const win = windowManager.createWindow(winX, winY, winW, winH, 'Window_B.exe');
         await windowManager.animateAppear(win);
 
         const closeBtn = windowManager.getCloseButtonCenter(win);
-
-        // Set cursor position
-        fakeCursor.setPosition(80, window.innerHeight - 100);
-        fakeCursor.setTarget(closeBtn.x, closeBtn.y);
-
-        // Show ghost path
-        fakeCursor.ghostStart = { x: fakeCursor.x, y: fakeCursor.y };
-        fakeCursor.ghostEnd = { x: closeBtn.x, y: closeBtn.y };
-        fakeCursor.showGhost = true;
 
         await this.delay(600);
 
         // Detailed obstacle injection logs
         await systemConsole.logSequence([
             { text: '장애물 주입 프로토콜 시작...', type: 'normal' },
-            { text: '├─ 미로 구조 생성 중...', type: 'dim' },
-            { text: '├─ 벽 밀도: 높음', type: 'dim' },
-            { text: '├─ 복잡도 레벨: 7/10', type: 'dim' },
+            { text: '├─ 정사각형 미로 생성 중...', type: 'dim' },
+            { text: '├─ 벽 배치: 완료', type: 'dim' },
             { text: '└─ 장애물 배치 완료', type: 'dim' },
         ], 350);
 
-        // Generate more complex maze around target
-        obstacleManager.generateComplexMaze(closeBtn.x, closeBtn.y, 200);
+        // Generate square maze around window with pre-calculated path
+        obstacleManager.generateSquareMaze(winX, winY, winW, winH);
+
+        // Set cursor at maze entry point (bottom-left outside maze)
+        const entryX = winX - 100;
+        const entryY = winY + winH + 120;
+        fakeCursor.setPosition(entryX, entryY);
+        fakeCursor.setTarget(closeBtn.x, closeBtn.y);
+
+        // Show ghost path (straight line - blocked)
+        fakeCursor.ghostStart = { x: fakeCursor.x, y: fakeCursor.y };
+        fakeCursor.ghostEnd = { x: closeBtn.x, y: closeBtn.y };
+        fakeCursor.showGhost = true;
 
         await this.delay(400);
 
         await systemConsole.logSequence([
             { text: '경로 차단 감지!', type: 'error' },
             { text: '직선 경로 불가능...', type: 'dim' },
-            { text: 'A* 경로 탐색 알고리즘 가동...', type: 'normal' },
-            { text: '├─ 노드 분석 중...', type: 'dim' },
-            { text: '├─ 최적 우회 경로 계산...', type: 'dim' },
-            { text: '└─ 경로 확정. 예상 시간: 12초', type: 'dim' },
+            { text: '우회 경로 탐색 중...', type: 'normal' },
+            { text: '├─ 미로 구조 분석...', type: 'dim' },
+            { text: '├─ 직각 경로 계산...', type: 'dim' },
+            { text: '└─ 경로 확정!', type: 'dim' },
         ], 300);
 
         await this.delay(500);
@@ -158,18 +160,18 @@ class PhaseManager {
         // Change trail to red
         fakeCursor.setTrailPhase('red');
 
-        // Find path through maze - longer path
-        const path = obstacleManager.findPath(
-            fakeCursor.x, fakeCursor.y,
-            closeBtn.x, closeBtn.y
-        );
+        // Get pre-calculated maze path
+        const path = obstacleManager.getMazePath();
+
+        // Add start position to path
+        const fullPath = [{ x: fakeCursor.x, y: fakeCursor.y }, ...path];
 
         audioSystem.playBass();
 
-        await systemConsole.typeMessageAsync('경로 탐색 실행 중...', 'normal');
+        await systemConsole.typeMessageAsync('미로 탐색 실행 중...', 'normal');
 
-        // Follow path slowly - minimum 10+ seconds
-        await fakeCursor.followPath(path, 0.04); // Much slower
+        // Follow path with right-angle turns - slower for visibility
+        await fakeCursor.followPath(fullPath, 0.08); // Slow, deliberate movement
 
         // Clear maze and close window
         obstacleManager.clearMaze();

@@ -59,187 +59,135 @@ class ObstacleManager {
         return this.mazeWalls;
     }
 
-    // Complex maze for Phase 2 - denser, more obstacles
-    generateComplexMaze(targetX, targetY, radius = 200) {
+    // Simple SQUARE maze for Phase 2 with pre-calculated path
+    generateSquareMaze(windowX, windowY, windowW, windowH) {
         this.mazeWalls = [];
-        this.mazeZIndex = 50; // Draw in front of windows
+        this.mazePath = []; // Pre-calculated path
 
-        const cellSize = 25;
-        const cols = Math.floor(radius * 2.5 / cellSize);
-        const rows = Math.floor(radius * 2.5 / cellSize);
-        const startX = targetX - radius * 1.2;
-        const startY = targetY - radius * 1.2;
+        const cellSize = 40;
+        const padding = 30;
 
-        // Create outer boundary walls
-        for (let i = 0; i < 4; i++) {
-            const angle = (i / 4) * Math.PI * 2;
-            const bx = targetX + Math.cos(angle) * (radius * 0.8);
-            const by = targetY + Math.sin(angle) * (radius * 0.8);
+        // Maze boundaries (square around the window)
+        const mazeLeft = windowX - 150;
+        const mazeTop = windowY - 100;
+        const mazeRight = windowX + windowW + 150;
+        const mazeBottom = windowY + windowH + 100;
+        const mazeWidth = mazeRight - mazeLeft;
+        const mazeHeight = mazeBottom - mazeTop;
 
-            this.mazeWalls.push({
-                x: bx - 40,
-                y: by - 5,
-                width: 80,
-                height: 10,
-                rotation: angle
-            });
-        }
+        // Close button position
+        const targetX = windowX + windowW - 22;
+        const targetY = windowY + 18;
 
-        // Dense inner maze
-        for (let i = 0; i < cols; i++) {
-            for (let j = 0; j < rows; j++) {
-                const x = startX + i * cellSize;
-                const y = startY + j * cellSize;
+        // Entry point (bottom left)
+        const entryX = mazeLeft + 50;
+        const entryY = mazeBottom;
 
-                // Skip center area (target zone)
-                const distToCenter = Math.sqrt(
-                    Math.pow(x + cellSize / 2 - targetX, 2) +
-                    Math.pow(y + cellSize / 2 - targetY, 2)
-                );
-                if (distToCenter < 35) continue;
+        // === BUILD MAZE WALLS ===
 
-                // Skip if too far
-                if (distToCenter > radius * 1.3) continue;
+        // Outer walls with gaps
+        // Top wall
+        this.mazeWalls.push({ x: mazeLeft, y: mazeTop, width: mazeWidth, height: 8 });
+        // Bottom wall with entry gap
+        this.mazeWalls.push({ x: mazeLeft + 100, y: mazeBottom, width: mazeWidth - 100, height: 8 });
+        // Left wall with gap at bottom
+        this.mazeWalls.push({ x: mazeLeft, y: mazeTop, width: 8, height: mazeHeight - 80 });
+        // Right wall
+        this.mazeWalls.push({ x: mazeRight - 8, y: mazeTop, width: 8, height: mazeHeight });
 
-                // Higher density wall creation
-                const pattern = (i * 7 + j * 11) % 5;
+        // Internal walls creating a path
+        const w = 8; // wall thickness
 
-                if (pattern === 0 || pattern === 2) {
-                    // Horizontal walls
-                    this.mazeWalls.push({
-                        x: x,
-                        y: y,
-                        width: cellSize * (Math.random() > 0.5 ? 1.5 : 1),
-                        height: 6
-                    });
-                }
+        // Row 1 - horizontal barrier with gap on right
+        this.mazeWalls.push({
+            x: mazeLeft,
+            y: mazeTop + cellSize * 2,
+            width: mazeWidth - cellSize * 3,
+            height: w
+        });
 
-                if (pattern === 1 || pattern === 3) {
-                    // Vertical walls
-                    this.mazeWalls.push({
-                        x: x,
-                        y: y,
-                        width: 6,
-                        height: cellSize * (Math.random() > 0.5 ? 1.5 : 1)
-                    });
-                }
+        // Row 2 - vertical barrier on right side
+        this.mazeWalls.push({
+            x: mazeRight - cellSize * 3,
+            y: mazeTop + cellSize * 2,
+            width: w,
+            height: cellSize * 2
+        });
 
-                // Add some L-shaped obstacles
-                if (pattern === 4 && Math.random() > 0.4) {
-                    this.mazeWalls.push({
-                        x: x,
-                        y: y,
-                        width: cellSize,
-                        height: 6
-                    });
-                    this.mazeWalls.push({
-                        x: x,
-                        y: y,
-                        width: 6,
-                        height: cellSize
-                    });
-                }
-            }
-        }
+        // Row 3 - horizontal barrier with gap on left
+        this.mazeWalls.push({
+            x: mazeLeft + cellSize * 2,
+            y: mazeTop + cellSize * 4,
+            width: mazeWidth - cellSize * 2,
+            height: w
+        });
 
-        // Add some diagonal barriers
-        for (let k = 0; k < 8; k++) {
-            const angle = (k / 8) * Math.PI * 2 + Math.PI / 8;
-            const dist = radius * (0.4 + Math.random() * 0.4);
-            const bx = targetX + Math.cos(angle) * dist;
-            const by = targetY + Math.sin(angle) * dist;
+        // Row 4 - vertical barrier on left
+        this.mazeWalls.push({
+            x: mazeLeft + cellSize * 2,
+            y: mazeTop + cellSize * 4,
+            width: w,
+            height: cellSize * 2
+        });
 
-            this.mazeWalls.push({
-                x: bx - 25,
-                y: by - 4,
-                width: 50,
-                height: 8
-            });
-        }
+        // Row 5 - horizontal barrier with gap on right
+        this.mazeWalls.push({
+            x: mazeLeft,
+            y: mazeTop + cellSize * 6,
+            width: mazeWidth - cellSize * 2,
+            height: w
+        });
+
+        // === PRE-CALCULATED PATH (right-angle turns) ===
+        // This path navigates through the maze with clear L-shaped turns
+
+        this.mazePath = [
+            // Start at entry
+            { x: entryX, y: entryY + 20 },
+            // Move up into maze
+            { x: entryX, y: mazeBottom - 30 },
+            // Continue up
+            { x: entryX, y: mazeTop + cellSize * 6 + 30 },
+            // Turn right
+            { x: mazeRight - cellSize * 1.5, y: mazeTop + cellSize * 6 + 30 },
+            // Turn up
+            { x: mazeRight - cellSize * 1.5, y: mazeTop + cellSize * 4 + 30 },
+            // Turn left
+            { x: mazeLeft + cellSize * 2 + 30, y: mazeTop + cellSize * 4 + 30 },
+            // Turn up
+            { x: mazeLeft + cellSize * 2 + 30, y: mazeTop + cellSize * 2 + 30 },
+            // Turn right
+            { x: mazeRight - cellSize * 2.5, y: mazeTop + cellSize * 2 + 30 },
+            // Turn up
+            { x: mazeRight - cellSize * 2.5, y: mazeTop + cellSize + 20 },
+            // Turn left towards target
+            { x: targetX, y: mazeTop + cellSize + 20 },
+            // Final approach - move down to target
+            { x: targetX, y: targetY }
+        ];
 
         return this.mazeWalls;
     }
 
-    // Simple pathfinding through maze
+    // Get the pre-calculated maze path
+    getMazePath() {
+        return this.mazePath || [];
+    }
+
+    // Simplified pathfinding - just return pre-calculated path
     findPath(startX, startY, endX, endY) {
-        const path = [];
-        const stepSize = 15;
-        let currentX = startX;
-        let currentY = startY;
-
-        path.push({ x: currentX, y: currentY });
-
-        // A* simplified - just find way around walls
-        const maxIterations = 500;
-        let iterations = 0;
-
-        while (iterations < maxIterations) {
-            iterations++;
-
-            const distToEnd = Math.sqrt(
-                Math.pow(currentX - endX, 2) +
-                Math.pow(currentY - endY, 2)
-            );
-
-            if (distToEnd < stepSize) {
-                path.push({ x: endX, y: endY });
-                break;
-            }
-
-            // Try to move towards target
-            const dirX = (endX - currentX) / distToEnd;
-            const dirY = (endY - currentY) / distToEnd;
-
-            let nextX = currentX + dirX * stepSize;
-            let nextY = currentY + dirY * stepSize;
-
-            // Check for wall collision
-            if (this.checkWallCollision(nextX, nextY)) {
-                // Try alternative directions
-                const alternatives = [
-                    { x: currentX + stepSize, y: currentY },
-                    { x: currentX - stepSize, y: currentY },
-                    { x: currentX, y: currentY + stepSize },
-                    { x: currentX, y: currentY - stepSize },
-                    { x: currentX + stepSize, y: currentY + stepSize },
-                    { x: currentX - stepSize, y: currentY + stepSize },
-                    { x: currentX + stepSize, y: currentY - stepSize },
-                    { x: currentX - stepSize, y: currentY - stepSize },
-                ];
-
-                // Find best alternative
-                let bestAlt = null;
-                let bestDist = Infinity;
-
-                for (const alt of alternatives) {
-                    if (!this.checkWallCollision(alt.x, alt.y)) {
-                        const dist = Math.sqrt(
-                            Math.pow(alt.x - endX, 2) +
-                            Math.pow(alt.y - endY, 2)
-                        );
-                        if (dist < bestDist) {
-                            bestDist = dist;
-                            bestAlt = alt;
-                        }
-                    }
-                }
-
-                if (bestAlt) {
-                    nextX = bestAlt.x;
-                    nextY = bestAlt.y;
-                } else {
-                    // Random escape
-                    nextX = currentX + (Math.random() - 0.5) * stepSize * 2;
-                    nextY = currentY + (Math.random() - 0.5) * stepSize * 2;
-                }
-            }
-
-            currentX = nextX;
-            currentY = nextY;
-            path.push({ x: currentX, y: currentY });
+        // If we have a pre-calculated path, use it
+        if (this.mazePath && this.mazePath.length > 0) {
+            // Prepend start position
+            return [{ x: startX, y: startY }, ...this.mazePath];
         }
 
-        return path;
+        // Fallback: simple direct path with one turn
+        return [
+            { x: startX, y: startY },
+            { x: startX, y: endY },
+            { x: endX, y: endY }
+        ];
     }
 
     checkWallCollision(x, y, padding = 10) {
@@ -253,18 +201,20 @@ class ObstacleManager {
     }
 
     drawMaze(p) {
+        if (this.mazeWalls.length === 0) return;
+
         p.push();
         p.noStroke();
 
         this.mazeWalls.forEach(wall => {
-            // Gradient-like effect
-            p.fill(80, 80, 120);
+            // Main wall
+            p.fill(60, 70, 120);
             p.rect(wall.x, wall.y, wall.width, wall.height, 2);
 
-            // Glow
-            p.drawingContext.shadowBlur = 10;
+            // Glow effect
+            p.drawingContext.shadowBlur = 15;
             p.drawingContext.shadowColor = '#6366f1';
-            p.fill(100, 100, 160);
+            p.fill(80, 90, 160);
             p.rect(wall.x + 1, wall.y + 1, wall.width - 2, wall.height - 2, 2);
             p.drawingContext.shadowBlur = 0;
         });
@@ -274,6 +224,7 @@ class ObstacleManager {
 
     clearMaze() {
         this.mazeWalls = [];
+        this.mazePath = [];
     }
 
     // ==================== MATH PUZZLE ====================
