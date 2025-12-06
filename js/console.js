@@ -237,9 +237,9 @@ class ConsoleLogger {
                 this.commandInput.value = this.currentCommand;
                 this.commandPlaceholder.textContent = '';
 
-                // Play autocomplete sound
+                // Play autocomplete sound (simple typing sound)
                 if (typeof audioSystem !== 'undefined' && audioSystem.initialized) {
-                    audioSystem.playSuccess();
+                    audioSystem.playBlip();
                 }
             }
         }

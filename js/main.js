@@ -25,6 +25,9 @@ function setup() {
         // Initialize audio (requires user gesture)
         await audioSystem.init();
 
+        // Play click sound
+        audioSystem.playBlip();
+
         // Start the demo
         setTimeout(() => {
             phaseManager.start();
