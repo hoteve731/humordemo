@@ -292,6 +292,16 @@ class PhaseManager {
         win.visible = true;
 
         await this.delay(500);
+
+        // Cursor moves to X button and clicks
+        await systemConsole.typeMessageAsync('창 닫기 실행...', 'dim');
+        const closeBtn = windowManager.getCloseButtonCenter(win);
+        fakeCursor.setTarget(closeBtn.x, closeBtn.y);
+        await fakeCursor.moveToTarget(0.5);
+
+        audioSystem.playBlip();
+        await this.delay(200);
+
         await windowManager.animateClose(win);
         windowManager.removeWindow(win.id);
     }
@@ -314,8 +324,20 @@ class PhaseManager {
 
         await this.delay(3000);
 
-        // Solve and close
+        // Solve
         await obstacleManager.solveMath();
+
+        await this.delay(500);
+
+        // Cursor moves to X button and clicks
+        await systemConsole.typeMessageAsync('수학 창 닫기...', 'dim');
+        const closeBtn = windowManager.getCloseButtonCenter(win);
+        fakeCursor.setTarget(closeBtn.x, closeBtn.y);
+        await fakeCursor.moveToTarget(0.5);
+
+        audioSystem.playBlip();
+        await this.delay(200);
+
         await windowManager.animateClose(win);
         windowManager.removeWindow(win.id);
 
@@ -346,7 +368,7 @@ class PhaseManager {
             { text: 'Execute 100_Steps_Combo', type: 'system' },
             { text: '├─ 리듬 엔진 초기화...', type: 'dim' },
             { text: '├─ BPM: 130', type: 'dim' },
-            { text: '├─ 시퀀스 카운트: 100', type: 'dim' },
+            { text: '├─ 시퀀스 카운트: 30', type: 'dim' },
             { text: '└─ 리듬 시퀀스 시작!', type: 'success' }
         ], 300);
 
@@ -355,67 +377,61 @@ class PhaseManager {
         fakeCursor.trailPersistent = true;
         fakeCursor.maxTrailLength = 2000;
 
-        // Start audio transport
-        audioSystem.startTransport();
-
-        // Schedule popups on beat
+        // Rhythm sequence: spawn popup, cursor moves to X, click, sound, repeat
         this.popupCount = 0;
-        const obstacleTypes = ['math', 'puzzle', 'maze'];
+        this.maxPopups = 20; // Reduced for better rhythm
 
-        this.beatScheduleId = audioSystem.scheduleOnBeat((time) => {
-            if (this.popupCount >= this.maxPopups) {
-                audioSystem.clearSchedule(this.beatScheduleId);
-                this.finishPhase4();
-                return;
-            }
-
-            this.popupCount++;
-            const type = obstacleTypes[this.popupCount % 3];
-            this.spawnRhythmPopup(type);
-
-            // Play corresponding sound
-            switch (type) {
-                case 'maze': audioSystem.playBass(); break;
-                case 'puzzle': audioSystem.playSnare(); break;
-                case 'math': audioSystem.playHihat(); break;
-            }
-        }, '4n');
-
-        // Move cursor randomly
-        this.rhythmMovement();
+        await this.rhythmSequence();
     }
 
-    spawnRhythmPopup(type) {
-        const x = Math.random() * (window.innerWidth - 200) + 50;
-        const y = Math.random() * (window.innerHeight - 200) + 50;
+    async rhythmSequence() {
+        const obstacleTypes = ['maze', 'puzzle', 'math'];
 
-        const win = windowManager.createWindow(x, y, 150, 100, type.toUpperCase());
-        windowManager.animateAppear(win);
-
-        // Auto-close after delay
-        setTimeout(() => {
-            if (windowManager.getWindow(win.id)) {
-                windowManager.animateClose(win).then(() => {
-                    windowManager.removeWindow(win.id);
-                });
-            }
-        }, 2500);
-    }
-
-    async rhythmMovement() {
         while (this.currentPhase === 4 && this.popupCount < this.maxPopups) {
-            const targetX = Math.random() * (window.innerWidth - 100) + 50;
-            const targetY = Math.random() * (window.innerHeight - 100) + 50;
+            this.popupCount++;
 
-            fakeCursor.setTarget(targetX, targetY);
-            await fakeCursor.moveToTarget(0.4);
-            await this.delay(50);
+            // Spawn popup at random position
+            const x = Math.random() * (window.innerWidth - 250) + 100;
+            const y = Math.random() * (window.innerHeight - 250) + 100;
+            const type = obstacleTypes[this.popupCount % 3];
+
+            const win = windowManager.createWindow(x, y, 150, 100, type.toUpperCase());
+            await windowManager.animateAppear(win);
+
+            // Play spawn sound (bass for beat)
+            audioSystem.playBass();
+
+            // Get close button position
+            const closeBtn = windowManager.getCloseButtonCenter(win);
+
+            // Cursor moves to X button - play hi-hat during movement
+            fakeCursor.setTarget(closeBtn.x, closeBtn.y);
+
+            // Movement with sound
+            const movePromise = fakeCursor.moveToTarget(0.3);
+
+            // Play hi-hat mid-movement
+            setTimeout(() => audioSystem.playHihat(), 150);
+
+            await movePromise;
+
+            // Click sound (snare)
+            audioSystem.playSnare();
+
+            // Close immediately
+            await windowManager.animateClose(win);
+            windowManager.removeWindow(win.id);
+
+            // Brief pause between popups for rhythm
+            await this.delay(200);
         }
+
+        // Finish phase 4
+        this.finishPhase4();
     }
 
     async finishPhase4() {
-        await this.delay(2500);
-        audioSystem.stopTransport();
+        await this.delay(1500);
 
         await systemConsole.logSequence([
             { text: '리듬 시퀀스 완료.', type: 'success' },
@@ -434,6 +450,9 @@ class PhaseManager {
 
     // ==================== PHASE 5: Climax ====================
     async runPhase5() {
+        // Disable input immediately to prevent repeat
+        systemConsole.disableInput();
+
         await systemConsole.logSequence([
             { text: '초월 모드 활성화...', type: 'system' },
             { text: '목표(창 닫기)는 잊었습니다.', type: 'normal' },
@@ -456,7 +475,7 @@ class PhaseManager {
         }
 
         // Let them float for a while
-        await this.delay(10000);
+        await this.delay(8000);
 
         // Fade out all
         await systemConsole.typeMessageAsync('시스템 종료 중...', 'system');
@@ -472,10 +491,12 @@ class PhaseManager {
 
         await systemConsole.logSequence([
             { text: 'IMPROV 완료.', type: 'success' },
-            { text: '감사합니다.', type: 'normal' }
+            { text: '감사합니다.', type: 'normal' },
+            { text: '[ 데모 종료 ]', type: 'dim' }
         ], 500);
 
         this.isRunning = false;
+        this.currentPhase = 0;
     }
 
     delay(ms) {
