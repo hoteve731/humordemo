@@ -236,6 +236,11 @@ class ConsoleLogger {
             if (this.currentCommand) {
                 this.commandInput.value = this.currentCommand;
                 this.commandPlaceholder.textContent = '';
+
+                // Play autocomplete sound
+                if (typeof audioSystem !== 'undefined' && audioSystem.initialized) {
+                    audioSystem.playSuccess();
+                }
             }
         }
     }

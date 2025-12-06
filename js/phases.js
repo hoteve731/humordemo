@@ -70,7 +70,11 @@ class PhaseManager {
         fakeCursor.setTrailPhase('grey');
         await fakeCursor.moveToTarget(0.8);
 
-        await this.delay(300);
+        await this.delay(200);
+
+        // Click sound when reaching X button
+        audioSystem.playBlip();
+        await this.delay(100);
 
         // Close window
         await windowManager.animateClose(win);
@@ -172,6 +176,10 @@ class PhaseManager {
 
         // Follow path with right-angle turns - slower for visibility
         await fakeCursor.followPath(fullPath, 0.08); // Slow, deliberate movement
+
+        // Click sound when reaching X button
+        audioSystem.playBlip();
+        await this.delay(200);
 
         // Clear maze and close window
         obstacleManager.clearMaze();
@@ -436,17 +444,13 @@ class PhaseManager {
         await systemConsole.logSequence([
             { text: '리듬 시퀀스 완료.', type: 'success' },
             { text: '비트 매칭 정확도: 98%', type: 'dim' },
-            { text: '...시스템에 변화가 감지됩니다.', type: 'normal' }
+            { text: '...시스템이 무언가를 깨달았습니다.', type: 'normal' }
         ], 400);
 
-        this.currentPhase = 5;
+        await this.delay(1000);
 
-        await this.delay(800);
-
-        // Prompt for Phase 5 - TRANSCEND
-        systemConsole.setExpectedCommand('transcend()', () => {
-            this.runPhase5();
-        });
+        // Run Phase 5 DIRECTLY - no more input needed
+        await this.runPhase5();
     }
 
     // ==================== PHASE 5: TRANSCEND - Fast Integrated Finale ====================
