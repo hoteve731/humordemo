@@ -90,6 +90,11 @@ class ConsoleLogger {
             const prefix = this.getPrefix(type);
             const fullMessage = prefix + message;
 
+            // Play typing sound at start
+            if (typeof audioSystem !== 'undefined' && audioSystem.initialized) {
+                audioSystem.playDigital();
+            }
+
             for (let i = 0; i < fullMessage.length; i++) {
                 line.textContent = fullMessage.substring(0, i + 1);
                 if (fullMessage[i] !== ' ') {
@@ -183,6 +188,12 @@ class ConsoleLogger {
             // Check if input matches expected command
             if (inputValue === expected) {
                 e.preventDefault();
+
+                // Play Enter sound
+                if (typeof audioSystem !== 'undefined' && audioSystem.initialized) {
+                    audioSystem.playBlip();
+                }
+
                 this.log(inputValue, 'command', true);
                 this.commandInput.value = '';
                 this.commandPlaceholder.textContent = '';

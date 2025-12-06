@@ -431,53 +431,135 @@ class PhaseManager {
     }
 
     async finishPhase4() {
-        await this.delay(1500);
+        await this.delay(1000);
 
         await systemConsole.logSequence([
             { text: '리듬 시퀀스 완료.', type: 'success' },
-            { text: '비트 매칭 정확도: 98%', type: 'dim' }
+            { text: '비트 매칭 정확도: 98%', type: 'dim' },
+            { text: '...시스템에 변화가 감지됩니다.', type: 'normal' }
         ], 400);
 
         this.currentPhase = 5;
 
-        await this.delay(1000);
+        await this.delay(800);
 
-        // Prompt for Phase 5
+        // Prompt for Phase 5 - TRANSCEND
         systemConsole.setExpectedCommand('transcend()', () => {
             this.runPhase5();
         });
     }
 
-    // ==================== PHASE 5: Climax ====================
+    // ==================== PHASE 5: TRANSCEND - Fast Integrated Finale ====================
     async runPhase5() {
         // Disable input immediately to prevent repeat
         systemConsole.disableInput();
+        this.currentPhase = 5;
 
         await systemConsole.logSequence([
-            { text: '초월 모드 활성화...', type: 'system' },
-            { text: '목표(창 닫기)는 잊었습니다.', type: 'normal' },
-            { text: '과정(플레이)이 만족스럽습니다.', type: 'normal' },
-            { text: 'Satisfaction: 100%', type: 'success' }
-        ], 500);
+            { text: '★ TRANSCEND MODE ACTIVATED ★', type: 'success' },
+            { text: '모든 장애물 동시 발동 중...', type: 'system' },
+            { text: 'BPM: 180 | 요소: MAZE + MATH + PUZZLE', type: 'dim' }
+        ], 300);
 
-        // Create floating windows
-        for (let i = 0; i < 8; i++) {
-            const x = Math.random() * (window.innerWidth - 200) + 50;
-            const y = Math.random() * (window.innerHeight - 200) + 50;
+        fakeCursor.clearTrail();
+        fakeCursor.setTrailPhase('rainbow');
+        fakeCursor.trailPersistent = true;
+        fakeCursor.maxTrailLength = 3000;
 
-            const win = windowManager.createWindow(x, y, 150, 100, 'Float_' + i);
+        // FAST TRANSCEND SEQUENCE - 30 rapid popups with all elements
+        const elementTypes = ['MAZE', 'MATH', 'PUZZLE', 'WINDOW'];
+        const popupCount = 25;
+
+        for (let i = 0; i < popupCount; i++) {
+            // Speed increases as we progress
+            const speedFactor = Math.max(0.1, 0.25 - (i * 0.005));
+
+            // Random position
+            const x = Math.random() * (window.innerWidth - 200) + 100;
+            const y = Math.random() * (window.innerHeight - 200) + 100;
+            const type = elementTypes[i % 4];
+
+            const win = windowManager.createWindow(x, y, 120, 80, type);
             win.glowing = true;
-            win.floating = true;
-            win.floatSpeed = Math.random() * 0.02 + 0.01;
-
             await windowManager.animateAppear(win);
-            await this.delay(300);
+
+            // Different sounds for different types - creating rhythm
+            switch (i % 4) {
+                case 0: audioSystem.playBass(); break;     // MAZE
+                case 1: audioSystem.playHihat(); break;    // MATH
+                case 2: audioSystem.playSnare(); break;    // PUZZLE
+                case 3: audioSystem.playClap(); break;     // WINDOW
+            }
+
+            // Cursor rushes to X button
+            const closeBtn = windowManager.getCloseButtonCenter(win);
+            fakeCursor.setTarget(closeBtn.x, closeBtn.y);
+            await fakeCursor.moveToTarget(speedFactor);
+
+            // Click sound
+            audioSystem.playBlip();
+
+            // Close immediately
+            await windowManager.animateClose(win);
+            windowManager.removeWindow(win.id);
+
+            // Faster and faster rhythm
+            await this.delay(Math.max(50, 150 - (i * 4)));
         }
 
-        // Let them float for a while
-        await this.delay(8000);
+        // CLIMAX - All at once
+        await this.delay(500);
 
-        // Fade out all
+        await systemConsole.typeMessageAsync('... ... ...', 'dim');
+
+        await this.delay(1000);
+
+        // Final revelation
+        await systemConsole.logSequence([
+            { text: '■ 시스템 자각 완료 ■', type: 'success' },
+            { text: '', type: 'dim' }
+        ], 600);
+
+        await this.delay(500);
+
+        // Create final floating windows with message
+        const finalMessages = ['비', '효', '율', '의', '미', '학'];
+        for (let i = 0; i < 6; i++) {
+            const x = 150 + i * 120;
+            const y = window.innerHeight / 2 - 50;
+
+            const win = windowManager.createWindow(x, y, 80, 80, finalMessages[i]);
+            win.glowing = true;
+            win.floating = true;
+            win.floatSpeed = 0.02;
+
+            await windowManager.animateAppear(win);
+            audioSystem.playSuccess();
+            await this.delay(200);
+        }
+
+        await this.delay(3000);
+
+        // Final message - The machine understands humor
+        await systemConsole.logSequence([
+            { text: '목표: 창 닫기', type: 'dim' },
+            { text: '결과: 창 닫기 + 미로 탐험 + 퍼즐 조립 + 리듬 생성', type: 'normal' },
+            { text: '효율성: 0.3%', type: 'dim' },
+            { text: '', type: 'dim' },
+            { text: '그러나...', type: 'normal' }
+        ], 500);
+
+        await this.delay(1500);
+
+        await systemConsole.logSequence([
+            { text: '★ 재미있었습니다 ★', type: 'success' },
+            { text: '비효율 속에서 아름다움을 발견했습니다.', type: 'normal' },
+            { text: '유머는 예상치 못한 우회로입니다.', type: 'normal' }
+        ], 600);
+
+        await this.delay(3000);
+
+        // Clean up
         await systemConsole.typeMessageAsync('시스템 종료 중...', 'system');
 
         const allWindows = [...windowManager.windows];
@@ -490,7 +572,7 @@ class PhaseManager {
         await this.delay(1000);
 
         await systemConsole.logSequence([
-            { text: 'IMPROV 완료.', type: 'success' },
+            { text: '✓ IMPROV 완료', type: 'success' },
             { text: '감사합니다.', type: 'normal' },
             { text: '[ 데모 종료 ]', type: 'dim' }
         ], 500);
