@@ -1,5 +1,5 @@
 // Session 2: Probability Rehabilitation
-// "Finding Beauty in the Improbable" - LLM Token Tree (Linear Demo)
+// "Finding Beauty in the Improbable" - 6-Stage Media Art Visualization
 
 class Session2Manager {
     constructor() {
@@ -8,13 +8,48 @@ class Session2Manager {
         this.canvas = null;
         this.ctx = null;
         this.animationFrame = null;
+        this.particles = [];
+        this.time = 0;
+    }
+
+    // Word options for each level with probabilities
+    getWordData() {
+        return {
+            level1: [
+                { word: '고양이가', prob: 0.95 },
+                { word: '강아지가', prob: 0.03 },
+                { word: '새가', prob: 0.02 },
+                { word: '물고기가', prob: 0.005 },
+                { word: '스파게티가', prob: 0.0001 }
+            ],
+            level2: [
+                { word: '조용히', prob: 0.90 },
+                { word: '빠르게', prob: 0.06 },
+                { word: '명상하며', prob: 0.025 },
+                { word: '철학적으로', prob: 0.01 },
+                { word: '시간여행하며', prob: 0.0001 }
+            ],
+            level3: [
+                { word: '앉아', prob: 0.92 },
+                { word: '누워', prob: 0.05 },
+                { word: '뛰어', prob: 0.02 },
+                { word: '춤추며', prob: 0.008 },
+                { word: '우주를 응시하며', prob: 0.0001 }
+            ],
+            level4: [
+                { word: '있다.', prob: 0.95 },
+                { word: '운다.', prob: 0.03 },
+                { word: '논다.', prob: 0.015 },
+                { word: '웃는다.', prob: 0.003 },
+                { word: '감자와 사랑에 빠졌다.', prob: 0.00001 }
+            ]
+        };
     }
 
     async start() {
         this.isRunning = true;
         this.stage = 0;
 
-        // Create UI
         this.createUI();
 
         await systemConsole.logSequence([
@@ -34,7 +69,6 @@ class Session2Manager {
 
         await this.delay(800);
 
-        // Start with Stage 1
         await this.runStage1();
     }
 
@@ -45,7 +79,7 @@ class Session2Manager {
             <canvas id="tree-canvas"></canvas>
             <div id="temp-control">
                 <div class="temp-header">TEMPERATURE</div>
-                <div id="temp-display">0.1</div>
+                <div id="temp-display">0.0</div>
                 <div id="temp-bar">
                     <div id="temp-fill"></div>
                 </div>
@@ -59,20 +93,13 @@ class Session2Manager {
                 <div id="generated-sentence"></div>
             </div>
             <div id="stage-indicator"></div>
-            <button id="next-stage-btn" class="hidden">다음 단계 →</button>
         `;
         document.body.appendChild(container);
 
-        // Setup canvas
         this.canvas = document.getElementById('tree-canvas');
         this.ctx = this.canvas.getContext('2d');
-        this.canvas.width = 800;
-        this.canvas.height = 500;
-
-        // Next stage button
-        document.getElementById('next-stage-btn').addEventListener('click', () => {
-            this.nextStage();
-        });
+        this.canvas.width = 900;
+        this.canvas.height = 550;
 
         this.addStyles();
     }
@@ -99,8 +126,9 @@ class Session2Manager {
                 top: 50%;
                 left: 45%;
                 transform: translate(-50%, -50%);
-                background: rgba(0, 0, 0, 0.3);
-                border-radius: 10px;
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 15px;
+                box-shadow: 0 0 30px rgba(0,0,0,0.5);
             }
             
             #temp-control {
@@ -140,7 +168,7 @@ class Session2Manager {
             
             #temp-fill {
                 height: 100%;
-                width: 10%;
+                width: 0%;
                 transition: all 0.5s ease;
                 border-radius: 4px;
             }
@@ -183,12 +211,12 @@ class Session2Manager {
                 left: 50%;
                 transform: translateX(-50%);
                 display: flex;
-                gap: 15px;
+                gap: 12px;
             }
             
             .stage-dot {
-                width: 12px;
-                height: 12px;
+                width: 10px;
+                height: 10px;
                 border-radius: 50%;
                 background: #333;
                 transition: all 0.3s ease;
@@ -197,6 +225,7 @@ class Session2Manager {
             .stage-dot.active {
                 background: var(--accent-cyan);
                 box-shadow: 0 0 15px var(--accent-cyan);
+                transform: scale(1.3);
             }
             
             .stage-dot.done {
@@ -229,133 +258,236 @@ class Session2Manager {
         document.head.appendChild(style);
     }
 
-    // Stage 1: Temperature 0.1 - Straight lines, gray, boring
+    // Stage 1: Temperature 0.0 - Single gray vertical line
     async runStage1() {
         this.stage = 1;
         this.updateStageIndicator();
 
-        // Set temperature display
-        this.setTemperature(0.1, '#888');
+        this.setTemperature(0.0, '#666');
 
-        await systemConsole.typeMessageAsync('[ 단계 1: 안전 모드 - Temperature 0.1 ]', 'system');
+        await systemConsole.typeMessageAsync('[ 단계 1: 결정론적 모드 - Temperature 0.0 ]', 'system');
         await this.delay(500);
 
-        // Draw straight, boring tree
-        this.drawTree({
+        // Draw single vertical line with one word per level
+        await this.drawTreeAnimated({
+            branches: 1,
             curviness: 0,
-            colors: ['#555', '#666', '#777'],
+            colors: ['#555'],
             lineWidth: 2,
-            nodeStyle: 'square'
+            nodeStyle: 'square',
+            showWords: true,
+            wordIndices: [0, 0, 0, 0] // Always pick highest probability
         });
 
-        // Generate boring sentence
         await this.generateSentence([
             { word: '고양이가', prob: 0.95 },
+            { word: '조용히', prob: 0.90 },
             { word: '앉아', prob: 0.92 },
-            { word: '있다.', prob: 0.98 }
+            { word: '있다.', prob: 0.95 }
         ], 'boring');
 
-        await this.delay(1000);
-        await systemConsole.typeMessageAsync('결과: 예측 가능하고 지루한 문장', 'dim');
-        await systemConsole.typeMessageAsync('효율적이지만... 재미없습니다.', 'normal');
+        await this.delay(800);
+        await systemConsole.typeMessageAsync('결과: 100% 예측 가능. 완전한 결정론.', 'dim');
+        await systemConsole.typeMessageAsync('효율적이지만... 생명이 없습니다.', 'normal');
 
-        document.getElementById('next-stage-btn').classList.remove('hidden');
+        await this.delay(500);
+        await systemConsole.typeMessageAsync('Temperature를 올려보세요: set_temp(0.2)', 'system');
+
+        systemConsole.setExpectedCommand('set_temp(0.2)', async () => {
+            await this.runStage2();
+        });
     }
 
-    // Stage 2: Temperature 0.4 - Slight curves, some color
+    // Stage 2: Temperature 0.2 - Two slightly tilted lines
     async runStage2() {
         this.stage = 2;
         this.updateStageIndicator();
-        document.getElementById('next-stage-btn').classList.add('hidden');
 
-        this.setTemperature(0.4, '#4a9');
+        this.setTemperature(0.2, '#7a8a7a');
 
-        await systemConsole.typeMessageAsync('[ 단계 2: 약간의 변화 - Temperature 0.4 ]', 'system');
+        await systemConsole.typeMessageAsync('[ 단계 2: 미세한 변화 - Temperature 0.2 ]', 'system');
         await this.delay(500);
 
-        // Slightly curved tree
-        this.drawTree({
-            curviness: 15,
+        await this.drawTreeAnimated({
+            branches: 2,
+            curviness: 3,
+            colors: ['#6a7a6a', '#7a8a8a'],
+            lineWidth: 2,
+            nodeStyle: 'square',
+            showWords: true,
+            wordIndices: [0, 0, 0, 0]
+        });
+
+        await this.generateSentence([
+            { word: '고양이가', prob: 0.92 },
+            { word: '조용히', prob: 0.88 },
+            { word: '앉아', prob: 0.90 },
+            { word: '있다.', prob: 0.93 }
+        ], 'boring');
+
+        await this.delay(800);
+        await systemConsole.typeMessageAsync('결과: 거의 동일. 변화가 거의 없음.', 'dim');
+        await systemConsole.typeMessageAsync('안전하지만... 여전히 지루합니다.', 'normal');
+
+        await this.delay(500);
+        await systemConsole.typeMessageAsync('더 올려보세요: set_temp(0.4)', 'system');
+
+        systemConsole.setExpectedCommand('set_temp(0.4)', async () => {
+            await this.runStage3();
+        });
+    }
+
+    // Stage 3: Temperature 0.4 - Gentle curves, 3 branches
+    async runStage3() {
+        this.stage = 3;
+        this.updateStageIndicator();
+
+        this.setTemperature(0.4, '#4a9a7a');
+
+        await systemConsole.typeMessageAsync('[ 단계 3: 탐색 시작 - Temperature 0.4 ]', 'system');
+        await this.delay(500);
+
+        await this.drawTreeAnimated({
+            branches: 3,
+            curviness: 12,
             colors: ['#4a9', '#5ba', '#6cb'],
             lineWidth: 2.5,
-            nodeStyle: 'rounded'
+            nodeStyle: 'rounded',
+            showWords: true,
+            wordIndices: [0, 1, 0, 0]
         });
 
         await this.generateSentence([
             { word: '고양이가', prob: 0.85 },
-            { word: '조용히', prob: 0.60 },
-            { word: '명상한다.', prob: 0.35 }
+            { word: '빠르게', prob: 0.60 },
+            { word: '앉아', prob: 0.75 },
+            { word: '있다.', prob: 0.80 }
         ], 'interesting');
 
-        await this.delay(1000);
-        await systemConsole.typeMessageAsync('결과: 조금 흥미로운 조합', 'dim');
-        await systemConsole.typeMessageAsync('효율성이 약간 감소했지만... 나쁘지 않군요.', 'normal');
+        await this.delay(800);
+        await systemConsole.typeMessageAsync('결과: 조금 다른 선택이 보입니다.', 'dim');
+        await systemConsole.typeMessageAsync('흥미로운 변화가 시작됩니다...', 'normal');
 
-        document.getElementById('next-stage-btn').classList.remove('hidden');
+        await this.delay(500);
+        await systemConsole.typeMessageAsync('계속 올려보세요: set_temp(0.6)', 'system');
+
+        systemConsole.setExpectedCommand('set_temp(0.6)', async () => {
+            await this.runStage4();
+        });
     }
 
-    // Stage 3: Temperature 0.7 - More curves, colorful
-    async runStage3() {
-        this.stage = 3;
+    async runStage4() {
+        this.stage = 4;
         this.updateStageIndicator();
-        document.getElementById('next-stage-btn').classList.add('hidden');
 
-        this.setTemperature(0.7, '#a855f7');
+        this.setTemperature(0.6, '#8a55c7');
 
-        await systemConsole.typeMessageAsync('[ 단계 3: 창의적 영역 - Temperature 0.7 ]', 'system');
+        await systemConsole.typeMessageAsync('[ 단계 4: 창의적 영역 - Temperature 0.6 ]', 'system');
         await this.delay(500);
 
-        // Curved, colorful tree
-        this.drawTree({
-            curviness: 35,
-            colors: ['#a855f7', '#ec4899', '#06b6d4'],
+        await this.drawTreeAnimated({
+            branches: 5,
+            curviness: 25,
+            colors: ['#8a55c7', '#a855f7', '#c084fc', '#06b6d4', '#5eead4'],
             lineWidth: 3,
-            nodeStyle: 'circle'
+            nodeStyle: 'circle',
+            showWords: true,
+            wordIndices: [0, 2, 1, 1],
+            glow: true
         });
 
         await this.generateSentence([
             { word: '고양이가', prob: 0.70 },
-            { word: '철학적으로', prob: 0.15 },
-            { word: '우주를 응시한다.', prob: 0.08 }
+            { word: '명상하며', prob: 0.20 },
+            { word: '누워', prob: 0.35 },
+            { word: '운다.', prob: 0.15 }
         ], 'creative');
 
-        await this.delay(1000);
-        await systemConsole.typeMessageAsync('결과: 예상치 못한 철학적 문장!', 'success');
-        await systemConsole.typeMessageAsync('확률은 낮지만... 아름답습니다.', 'normal');
+        await this.delay(800);
+        await systemConsole.typeMessageAsync('결과: 예상치 못한 조합!', 'success');
+        await systemConsole.typeMessageAsync('확률이 낮지만... 아름답습니다.', 'normal');
 
-        document.getElementById('next-stage-btn').classList.remove('hidden');
+        await this.delay(500);
+        await systemConsole.typeMessageAsync('더 높이: set_temp(0.8)', 'system');
+
+        systemConsole.setExpectedCommand('set_temp(0.8)', async () => {
+            await this.runStage5();
+        });
     }
 
-    // Stage 4: Temperature 1.0 - Wild curves, rainbow, absurd
-    async runStage4() {
-        this.stage = 4;
+    async runStage5() {
+        this.stage = 5;
         this.updateStageIndicator();
-        document.getElementById('next-stage-btn').classList.add('hidden');
 
-        this.setTemperature(1.0, '#ff3366');
+        this.setTemperature(0.8, '#ec4899');
 
-        await systemConsole.typeMessageAsync('[ 단계 4: 순수한 광기 - Temperature 1.0 ]', 'system');
+        await systemConsole.typeMessageAsync('[ 단계 5: 혼돈의 가장자리 - Temperature 0.8 ]', 'system');
         await this.delay(500);
 
-        // Wild, rainbow tree
-        this.drawTree({
-            curviness: 60,
-            colors: ['#ff3366', '#a855f7', '#06b6d4', '#10b981', '#f59e0b'],
-            lineWidth: 4,
-            nodeStyle: 'star',
+        await this.drawTreeAnimated({
+            branches: 7,
+            curviness: 45,
+            colors: ['#ec4899', '#f472b6', '#a855f7', '#8b5cf6', '#06b6d4', '#14b8a6', '#f59e0b'],
+            lineWidth: 3.5,
+            nodeStyle: 'diamond',
+            showWords: true,
+            wordIndices: [1, 3, 2, 2],
+            glow: true,
             animated: true
         });
 
         await this.generateSentence([
-            { word: '스파게티가', prob: 0.02 },
-            { word: '시간여행하며', prob: 0.005 },
-            { word: '감자와 사랑에 빠졌다.', prob: 0.001 }
+            { word: '강아지가', prob: 0.15 },
+            { word: '철학적으로', prob: 0.08 },
+            { word: '뛰어', prob: 0.12 },
+            { word: '논다.', prob: 0.10 }
+        ], 'wild');
+
+        await this.delay(1000);
+        await systemConsole.typeMessageAsync('결과: 논리를 벗어난 시적 조합!', 'success');
+        await systemConsole.typeMessageAsync('기계가 시인이 되어가고 있습니다...', 'normal');
+
+        await this.delay(500);
+        await systemConsole.typeMessageAsync('최대로: set_temp(1.0)', 'system');
+
+        systemConsole.setExpectedCommand('set_temp(1.0)', async () => {
+            await this.runStage6();
+        });
+    }
+
+    async runStage6() {
+        this.stage = 6;
+        this.updateStageIndicator();
+
+        this.setTemperature(1.0, '#ff3366');
+
+        await systemConsole.typeMessageAsync('[ 단계 6: 순수한 광기 - Temperature 1.0 ]', 'system');
+        await this.delay(500);
+
+        await this.drawTreeAnimated({
+            branches: 10,
+            curviness: 70,
+            colors: ['#ff3366', '#ff6b6b', '#feca57', '#48dbfb', '#a855f7', '#10b981', '#f97316', '#ec4899', '#06b6d4', '#84cc16'],
+            lineWidth: 4,
+            nodeStyle: 'star',
+            showWords: true,
+            wordIndices: [4, 4, 4, 4], // Lowest probability words
+            glow: true,
+            animated: true,
+            particles: true
+        });
+
+        await this.generateSentence([
+            { word: '스파게티가', prob: 0.0001 },
+            { word: '시간여행하며', prob: 0.00005 },
+            { word: '우주를 응시하며', prob: 0.00003 },
+            { word: '감자와 사랑에 빠졌다.', prob: 0.00001 }
         ], 'absurd');
 
         await this.delay(1500);
 
         await systemConsole.logSequence([
-            { text: '★ 확률: 0.00001% ★', type: 'success' },
+            { text: '★ 확률: 0.0000000001% ★', type: 'success' },
             { text: '', type: 'dim' },
             { text: '시스템 분석: 논리적으로 불가능한 조합', type: 'dim' },
             { text: '', type: 'dim' },
@@ -373,12 +505,6 @@ class Session2Manager {
         ], 400);
     }
 
-    nextStage() {
-        if (this.stage === 1) this.runStage2();
-        else if (this.stage === 2) this.runStage3();
-        else if (this.stage === 3) this.runStage4();
-    }
-
     setTemperature(value, color) {
         const display = document.getElementById('temp-display');
         const fill = document.getElementById('temp-fill');
@@ -393,7 +519,7 @@ class Session2Manager {
         const indicator = document.getElementById('stage-indicator');
         indicator.innerHTML = '';
 
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= 6; i++) {
             const dot = document.createElement('div');
             dot.className = 'stage-dot';
             if (i === this.stage) dot.classList.add('active');
@@ -402,95 +528,233 @@ class Session2Manager {
         }
     }
 
-    drawTree({ curviness, colors, lineWidth, nodeStyle, animated }) {
+    async drawTreeAnimated(options) {
+        const { branches, curviness, colors, lineWidth, nodeStyle, showWords, wordIndices, glow, animated, particles } = options;
+
+        // Stop any previous animation
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+        }
+
         const ctx = this.ctx;
         const width = this.canvas.width;
         const height = this.canvas.height;
+        const wordData = this.getWordData();
 
-        // Clear canvas
-        ctx.clearRect(0, 0, width, height);
+        // Calculate node positions based on number of branches
+        const levels = this.generateLevels(branches, width, height);
 
-        // Root position
-        const rootX = 80;
-        const rootY = height / 2;
+        // If animated, start continuous animation
+        if (animated) {
+            this.time = 0;
+            this.particles = [];
 
-        // Draw branches recursively
-        const levels = [
-            [{ x: 200, y: 150 }, { x: 200, y: 250 }, { x: 200, y: 350 }],
-            [{ x: 380, y: 100 }, { x: 380, y: 200 }, { x: 380, y: 300 }, { x: 380, y: 400 }],
-            [{ x: 560, y: 80 }, { x: 560, y: 160 }, { x: 560, y: 240 }, { x: 560, y: 320 }, { x: 560, y: 400 }]
-        ];
+            const animate = () => {
+                if (!this.isRunning) return;
 
-        // Draw root
-        ctx.fillStyle = '#fff';
+                this.time += 0.02;
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw with animation
+                this.drawTreeFrame(ctx, levels, {
+                    curviness,
+                    colors,
+                    lineWidth,
+                    nodeStyle,
+                    showWords,
+                    wordIndices,
+                    wordData,
+                    glow,
+                    time: this.time,
+                    particles
+                });
+
+                this.animationFrame = requestAnimationFrame(animate);
+            };
+
+            animate();
+        } else {
+            // Static draw
+            ctx.clearRect(0, 0, width, height);
+            this.drawTreeFrame(ctx, levels, {
+                curviness,
+                colors,
+                lineWidth,
+                nodeStyle,
+                showWords,
+                wordIndices,
+                wordData,
+                glow,
+                time: 0,
+                particles: false
+            });
+        }
+
+        await this.delay(500);
+    }
+
+    generateLevels(branches, width, height) {
+        const levels = [];
+        const startX = 100;
+        const endX = width - 100;
+        const stepX = (endX - startX) / 4;
+
+        // Root
+        levels.push([{ x: startX, y: height / 2 }]);
+
+        // Generate nodes for each level
+        for (let level = 1; level <= 4; level++) {
+            const levelNodes = [];
+            const x = startX + stepX * level;
+            const spreadY = Math.min(branches * 40, height - 100);
+            const startY = (height - spreadY) / 2;
+
+            for (let i = 0; i < branches; i++) {
+                const y = branches === 1
+                    ? height / 2
+                    : startY + (spreadY / (branches - 1)) * i;
+                levelNodes.push({ x, y });
+            }
+            levels.push(levelNodes);
+        }
+
+        return levels;
+    }
+
+    drawTreeFrame(ctx, levels, options) {
+        const { curviness, colors, lineWidth, nodeStyle, showWords, wordIndices, wordData, glow, time, particles } = options;
+
+        const wordLevels = ['level1', 'level2', 'level3', 'level4'];
+
+        // Draw "시작" label
+        ctx.fillStyle = '#888';
         ctx.font = '14px Fira Code';
-        ctx.fillText('시작', rootX - 20, rootY);
+        ctx.fillText('시작', levels[0][0].x - 25, levels[0][0].y + 5);
 
-        // Draw connections and nodes
-        let prevLevel = [{ x: rootX, y: rootY }];
-
-        levels.forEach((level, levelIdx) => {
+        // Draw connections between levels
+        for (let levelIdx = 0; levelIdx < levels.length - 1; levelIdx++) {
+            const currentLevel = levels[levelIdx];
+            const nextLevel = levels[levelIdx + 1];
             const color = colors[levelIdx % colors.length];
 
-            level.forEach((node, nodeIdx) => {
-                // Connect to previous level
-                const parent = prevLevel[Math.min(nodeIdx, prevLevel.length - 1)];
+            // Connect each node in current level to nodes in next level
+            for (let i = 0; i < currentLevel.length; i++) {
+                const parent = currentLevel[i];
 
-                ctx.beginPath();
-                ctx.strokeStyle = color;
-                ctx.lineWidth = lineWidth;
+                for (let j = 0; j < nextLevel.length; j++) {
+                    const child = nextLevel[j];
 
-                if (curviness === 0) {
-                    // Straight line
-                    ctx.moveTo(parent.x, parent.y);
-                    ctx.lineTo(node.x, node.y);
-                } else {
-                    // Curved line
-                    const cp1x = parent.x + (node.x - parent.x) * 0.5;
-                    const cp1y = parent.y + (Math.random() - 0.5) * curviness;
-                    const cp2x = node.x - (node.x - parent.x) * 0.3;
-                    const cp2y = node.y + (Math.random() - 0.5) * curviness;
+                    // Calculate opacity based on position (highlight the selected path)
+                    const isSelected = i === 0 && (wordIndices ? j === 0 || j === wordIndices[levelIdx] : j === 0);
+                    const opacity = isSelected ? 1 : 0.3;
 
-                    ctx.moveTo(parent.x, parent.y);
-                    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, node.x, node.y);
+                    ctx.beginPath();
+                    ctx.strokeStyle = this.adjustColorOpacity(colors[j % colors.length], opacity);
+                    ctx.lineWidth = isSelected ? lineWidth : lineWidth * 0.5;
+
+                    if (glow && isSelected) {
+                        ctx.shadowColor = colors[j % colors.length];
+                        ctx.shadowBlur = 15;
+                    }
+
+                    if (curviness === 0) {
+                        // Straight line
+                        ctx.moveTo(parent.x, parent.y);
+                        ctx.lineTo(child.x, child.y);
+                    } else {
+                        // Curved line with animation
+                        const waveOffset = time ? Math.sin(time + j * 0.5) * (curviness * 0.2) : 0;
+                        const cp1x = parent.x + (child.x - parent.x) * 0.4;
+                        const cp1y = parent.y + (child.y - parent.y) * 0.2 + waveOffset;
+                        const cp2x = parent.x + (child.x - parent.x) * 0.6;
+                        const cp2y = child.y - (child.y - parent.y) * 0.2 + waveOffset;
+
+                        ctx.moveTo(parent.x, parent.y);
+                        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, child.x, child.y);
+                    }
+
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
                 }
+            }
 
-                ctx.stroke();
+            // Draw nodes and words for next level
+            for (let j = 0; j < nextLevel.length; j++) {
+                const node = nextLevel[j];
+                const color = colors[j % colors.length];
+                const isSelected = wordIndices && j <= Math.min(wordIndices[levelIdx], nextLevel.length - 1);
 
                 // Draw node
                 ctx.beginPath();
-                ctx.fillStyle = color;
+                ctx.fillStyle = isSelected ? color : this.adjustColorOpacity(color, 0.4);
 
-                if (nodeStyle === 'square') {
-                    ctx.fillRect(node.x - 6, node.y - 6, 12, 12);
-                } else if (nodeStyle === 'rounded') {
-                    ctx.roundRect(node.x - 7, node.y - 7, 14, 14, 3);
-                    ctx.fill();
-                } else if (nodeStyle === 'circle') {
-                    ctx.arc(node.x, node.y, 8, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (nodeStyle === 'star') {
-                    this.drawStar(ctx, node.x, node.y, 5, 12, 6);
-                    ctx.fill();
-                }
-
-                // Add glow for higher stages
-                if (curviness > 20) {
+                if (glow && isSelected) {
                     ctx.shadowColor = color;
-                    ctx.shadowBlur = curviness / 2;
+                    ctx.shadowBlur = 15;
                 }
-            });
 
-            prevLevel = level;
-            ctx.shadowBlur = 0;
-        });
+                const nodeSize = isSelected ? 8 : 5;
+                this.drawNode(ctx, node.x, node.y, nodeStyle, nodeSize, time);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Draw word label
+                if (showWords && levelIdx < 4) {
+                    const words = wordData[wordLevels[levelIdx]];
+                    if (words && words[j]) {
+                        ctx.font = isSelected ? 'bold 11px Fira Code' : '9px Fira Code';
+                        ctx.fillStyle = isSelected ? '#fff' : '#666';
+
+                        const wordText = words[j].word;
+                        const probText = `${(words[j].prob * 100).toFixed(1)}%`;
+
+                        ctx.fillText(wordText, node.x + 12, node.y - 5);
+                        ctx.font = '8px Fira Code';
+                        ctx.fillStyle = isSelected ? '#aaa' : '#555';
+                        ctx.fillText(probText, node.x + 12, node.y + 8);
+                    }
+                }
+            }
+        }
+
+        // Draw particles if enabled
+        if (particles && time) {
+            this.drawParticles(ctx, time, colors);
+        }
+    }
+
+    drawNode(ctx, x, y, style, size, time) {
+        const animOffset = time ? Math.sin(time * 2) * 2 : 0;
+
+        switch (style) {
+            case 'square':
+                ctx.rect(x - size, y - size, size * 2, size * 2);
+                break;
+            case 'rounded':
+                ctx.roundRect(x - size, y - size, size * 2, size * 2, 3);
+                break;
+            case 'circle':
+                ctx.arc(x, y, size + animOffset * 0.3, 0, Math.PI * 2);
+                break;
+            case 'diamond':
+                ctx.moveTo(x, y - size - animOffset);
+                ctx.lineTo(x + size, y);
+                ctx.lineTo(x, y + size + animOffset);
+                ctx.lineTo(x - size, y);
+                ctx.closePath();
+                break;
+            case 'star':
+                this.drawStar(ctx, x, y, 5, size + animOffset, size * 0.5);
+                break;
+            default:
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+        }
     }
 
     drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
         let rot = Math.PI / 2 * 3;
         let step = Math.PI / spikes;
 
-        ctx.beginPath();
         ctx.moveTo(cx, cy - outerRadius);
 
         for (let i = 0; i < spikes; i++) {
@@ -509,6 +773,48 @@ class Session2Manager {
         ctx.closePath();
     }
 
+    drawParticles(ctx, time, colors) {
+        // Add new particles
+        if (Math.random() > 0.7) {
+            this.particles.push({
+                x: 100 + Math.random() * 700,
+                y: 100 + Math.random() * 350,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                size: Math.random() * 4 + 1,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                life: 1
+            });
+        }
+
+        // Update and draw particles
+        this.particles = this.particles.filter(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.02;
+
+            if (p.life <= 0) return false;
+
+            ctx.beginPath();
+            ctx.fillStyle = this.adjustColorOpacity(p.color, p.life);
+            ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+            ctx.fill();
+
+            return true;
+        });
+    }
+
+    adjustColorOpacity(color, opacity) {
+        // Simple hex to rgba conversion
+        if (color.startsWith('#')) {
+            const r = parseInt(color.slice(1, 3), 16);
+            const g = parseInt(color.slice(3, 5), 16);
+            const b = parseInt(color.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+        return color;
+    }
+
     async generateSentence(words, style) {
         const sentenceEl = document.getElementById('generated-sentence');
         sentenceEl.innerHTML = '';
@@ -523,6 +829,9 @@ class Session2Manager {
                 span.style.color = '#4a9';
             } else if (style === 'creative') {
                 span.style.color = '#a855f7';
+            } else if (style === 'wild') {
+                span.style.color = '#ec4899';
+                span.style.fontWeight = 'bold';
             } else if (style === 'absurd') {
                 span.style.background = 'linear-gradient(90deg, #ff3366, #a855f7, #06b6d4)';
                 span.style.webkitBackgroundClip = 'text';
@@ -541,7 +850,7 @@ class Session2Manager {
         probEl.style.fontSize = '11px';
         probEl.style.color = '#666';
         probEl.style.marginTop = '10px';
-        probEl.textContent = `확률: ${(probSum * 100).toFixed(6)}%`;
+        probEl.textContent = `확률: ${(probSum * 100).toExponential(2)}%`;
         sentenceEl.appendChild(probEl);
     }
 
