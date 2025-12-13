@@ -1,5 +1,66 @@
 // Main Entry Point - p5.js setup and draw loop
 
+// ===== THEME MANAGEMENT =====
+const themeManager = {
+    currentTheme: 'dark',
+
+    init() {
+        // Load saved theme from localStorage
+        const savedTheme = localStorage.getItem('improv-theme') || 'dark';
+        this.setTheme(savedTheme);
+
+        // Set up toggle button
+        const toggleBtn = document.getElementById('theme-toggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggle());
+        }
+    },
+
+    setTheme(theme) {
+        this.currentTheme = theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('improv-theme', theme);
+        this.updateToggleButton();
+    },
+
+    toggle() {
+        const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+        this.setTheme(newTheme);
+    },
+
+    updateToggleButton() {
+        const toggleBtn = document.getElementById('theme-toggle');
+        if (toggleBtn) {
+            const icon = toggleBtn.querySelector('.toggle-icon');
+            const text = toggleBtn.querySelector('.toggle-text');
+            if (this.currentTheme === 'dark') {
+                icon.textContent = '☀️';
+                text.textContent = 'LIGHT';
+            } else {
+                icon.textContent = '🌙';
+                text.textContent = 'DARK';
+            }
+        }
+    },
+
+    // Get colors for p5.js canvas based on current theme
+    getCanvasColors() {
+        if (this.currentTheme === 'light') {
+            return {
+                background: [245, 240, 230],  // Sepia background
+                grid: [200, 190, 170, 80],    // Light sepia grid
+                vignette: [232, 224, 208]     // Light vignette
+            };
+        } else {
+            return {
+                background: [10, 10, 15],     // Dark background
+                grid: [20, 20, 30],           // Dark grid
+                vignette: [0, 0, 0]           // Dark vignette
+            };
+        }
+    }
+};
+
 let stageCanvas;
 let p5Instance = null;
 
@@ -18,8 +79,9 @@ const sketch = (p) => {
     };
 
     p.draw = function () {
-        // Clear background
-        p.background(10, 10, 15);
+        // Clear background with theme-aware colors
+        const colors = themeManager.getCanvasColors();
+        p.background(...colors.background);
 
         // Draw desktop grid pattern
         drawDesktopGrid(p);
@@ -89,8 +151,10 @@ const sketch = (p) => {
 };
 
 function drawDesktopGrid(p) {
+    const colors = themeManager.getCanvasColors();
+
     p.push();
-    p.stroke(20, 20, 30);
+    p.stroke(...colors.grid);
     p.strokeWeight(1);
 
     const gridSize = 50;
@@ -105,7 +169,7 @@ function drawDesktopGrid(p) {
     // Subtle vignette effect
     p.noFill();
     for (let i = 0; i < 5; i++) {
-        p.stroke(0, 0, 0, (5 - i) * 10);
+        p.stroke(...colors.vignette, (5 - i) * 10);
         p.strokeWeight(100 - i * 20);
         p.rect(0, 0, p.width, p.height);
     }
@@ -115,6 +179,9 @@ function drawDesktopGrid(p) {
 
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize theme manager
+    themeManager.init();
+
     // Initialize session manager
     sessionManager.init();
 

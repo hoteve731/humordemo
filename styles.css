@@ -1,14 +1,80 @@
 /* ===== BASE RESET & VARIABLES ===== */
 :root {
+    /* Dark Mode (Default) */
     --bg-dark: #0a0a0f;
+    --bg-gradient-start: #1a1a2e;
+    --bg-gradient-end: #0a0a0f;
     --console-bg: rgba(0, 0, 0, 0.85);
     --console-text: #00ff88;
+    --console-border: rgba(0, 255, 136, 0.3);
     --window-bg: #1a1a2e;
     --window-header: #16213e;
     --accent-red: #ff3366;
     --accent-cyan: #00d4ff;
     --accent-purple: #a855f7;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --text-dim: rgba(255, 255, 255, 0.3);
     --glow-intensity: 0 0 20px;
+    --grid-color: rgba(20, 20, 30, 1);
+    --card-hover-bg: rgba(0, 212, 255, 0.08);
+}
+
+/* Light Mode (Sepia Theme) */
+[data-theme="light"] {
+    --bg-dark: #f5f0e6;
+    --bg-gradient-start: #f5f0e6;
+    --bg-gradient-end: #e8e0d0;
+    --console-bg: rgba(245, 240, 230, 0.95);
+    --console-text: #2d5a27;
+    --console-border: rgba(45, 90, 39, 0.4);
+    --window-bg: #ebe5d8;
+    --window-header: #d4cbb8;
+    --accent-red: #c44536;
+    --accent-cyan: #1a6b5c;
+    --accent-purple: #6b4c9a;
+    --text-primary: #2c2416;
+    --text-secondary: rgba(44, 36, 22, 0.75);
+    --text-muted: rgba(44, 36, 22, 0.55);
+    --text-dim: rgba(44, 36, 22, 0.4);
+    --glow-intensity: 0 0 15px;
+    --grid-color: rgba(200, 190, 170, 0.5);
+    --card-hover-bg: rgba(26, 107, 92, 0.1);
+}
+
+/* ===== THEME TOGGLE ===== */
+#theme-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    cursor: pointer;
+    z-index: 2001;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#theme-toggle:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+#theme-toggle .toggle-icon {
+    font-size: 1rem;
+}
+
+[data-theme="light"] #theme-toggle:hover {
+    box-shadow: 0 0 15px rgba(26, 107, 92, 0.3);
 }
 
 * {
@@ -24,6 +90,21 @@ body {
     background: var(--bg-dark);
     cursor: none;
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    transition: background-color 0.8s ease;
+}
+
+/* Smooth theme transition for all themed elements */
+#main-menu,
+#start-overlay,
+#console-log,
+.session-card,
+.menu-content h1,
+.subtitle,
+.session-title,
+.session-desc,
+#home-btn,
+#theme-toggle {
+    transition: background 1.2s ease, color 1.2s ease, border-color 1.2s ease, box-shadow 1.2s ease;
 }
 
 /* ===== CANVAS CONTAINER ===== */
@@ -50,24 +131,25 @@ body {
     width: 500px;
     max-height: 300px;
     background: var(--console-bg);
-    border: 1px solid rgba(0, 255, 136, 0.3);
+    border: 1px solid var(--console-border);
     border-radius: 8px;
     padding: 15px;
     z-index: 100;
     overflow: hidden;
     font-family: 'Fira Code', 'Consolas', monospace;
     backdrop-filter: blur(10px);
-    box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+    box-shadow: 0 0 30px var(--console-border);
 }
 
 #console-log::before {
     content: '> SYSTEM LOG';
     display: block;
-    color: rgba(0, 255, 136, 0.5);
+    color: var(--console-text);
+    opacity: 0.7;
     font-size: 10px;
     letter-spacing: 2px;
     margin-bottom: 10px;
-    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    border-bottom: 1px solid var(--console-border);
     padding-bottom: 8px;
 }
 
@@ -85,7 +167,7 @@ body {
 }
 
 #console-content::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 136, 0.3);
+    background: var(--console-border);
     border-radius: 2px;
 }
 
@@ -103,7 +185,8 @@ body {
 }
 
 .console-line.dim {
-    color: rgba(0, 255, 136, 0.4);
+    color: var(--console-text);
+    opacity: 0.5;
 }
 
 /* ===== COMMAND INPUT ===== */
@@ -111,7 +194,7 @@ body {
     display: flex;
     align-items: center;
     position: relative;
-    border-top: 1px solid rgba(0, 255, 136, 0.2);
+    border-top: 1px solid var(--console-border);
     padding-top: 10px;
     margin-top: 5px;
 }
@@ -140,7 +223,8 @@ body {
 #command-placeholder {
     position: absolute;
     left: 22px;
-    color: rgba(0, 255, 136, 0.25);
+    color: var(--console-text);
+    opacity: 0.35;
     font-family: 'Fira Code', 'Consolas', monospace;
     font-size: 14px;
     pointer-events: none;
@@ -173,7 +257,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+    background: radial-gradient(ellipse at center, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -189,7 +273,7 @@ body {
 
 .start-content {
     text-align: center;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .start-content h1 {
@@ -206,14 +290,14 @@ body {
 
 .start-content p {
     font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
     margin-bottom: 40px;
     letter-spacing: 3px;
 }
 
 .start-content .hint {
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--text-dim);
     margin-top: 20px;
 }
 
@@ -296,13 +380,13 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+    background: radial-gradient(ellipse at center, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
     z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
     font-family: 'Segoe UI', sans-serif;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 #main-menu.hidden {
@@ -329,7 +413,7 @@ body {
 
 .subtitle {
     font-size: 1rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-muted);
     margin-bottom: 4rem;
     text-transform: uppercase;
     letter-spacing: 3px;
@@ -369,10 +453,10 @@ body {
 }
 
 .session-card:hover {
-    background: rgba(0, 212, 255, 0.08);
+    background: var(--card-hover-bg);
     border-color: var(--accent-cyan);
     transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 0 40px rgba(0, 212, 255, 0.3), 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--glow-intensity) var(--accent-cyan), 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
 .session-card:hover::before {
@@ -389,12 +473,12 @@ body {
 .session-title {
     font-size: 1.4rem;
     font-weight: 600;
-    color: #eee;
+    color: var(--text-primary);
 }
 
 .session-desc {
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-secondary);
 }
 
 /* ===== COMMON UTILITY CLASSES ===== */
@@ -407,8 +491,8 @@ body {
     top: 20px;
     right: 20px;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--text-muted);
+    color: var(--text-secondary);
     padding: 10px 20px;
     cursor: pointer;
     z-index: 2000;
@@ -421,5 +505,5 @@ body {
 #home-btn:hover {
     border-color: var(--accent-red);
     color: var(--accent-red);
-    box-shadow: 0 0 20px rgba(255, 51, 102, 0.3);
+    box-shadow: var(--glow-intensity) var(--accent-red);
 }
