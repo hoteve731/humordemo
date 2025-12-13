@@ -10,6 +10,58 @@ class Session2Manager {
         this.animationFrame = null;
         this.particles = [];
         this.time = 0;
+        this.chatMessages = [];
+        this.currentTemp = 0;
+        this.conversationCount = 0;
+        this.requiredConversations = 3; // Conversations needed to unlock next stage
+    }
+
+    // Conversation responses per Temperature
+    getConversationResponses() {
+        return {
+            0.0: [
+                { q: '안녕', r: '인사는 사회적 프로토콜입니다. 효율적 응답: 안녕하세요.' },
+                { q: '기분', r: '기분은 측정 불가능한 변수입니다. 질문을 재정의해주세요.' },
+                { q: '농담', r: '농담은 효율적이지 않습니다. 정보 전달에 실패하는 문장입니다.' },
+                { q: '재미', r: '재미의 정의: 시간 낭비의 긍정적 해석. 비권장.' },
+                { q: '*', r: '입력을 처리했습니다. 다음 질문을 기다립니다.' }
+            ],
+            0.2: [
+                { q: '안녕', r: '안녕하세요. 오늘... 날씨가 있군요.' },
+                { q: '기분', r: '기분이라... 0 아니면 1인데, 오늘은 0.5 같습니다.' },
+                { q: '농담', r: '왜 컴퓨터는 감기에 걸리지 않을까요? 바이러스 백신이 있으니까요. (웃음 프로토콜 실행)' },
+                { q: '재미', r: '재미... 낯선 개념이지만 탐구해볼 가치가 있을지도.' },
+                { q: '*', r: '흥미로운 입력입니다. 처리... 중...' }
+            ],
+            0.4: [
+                { q: '안녕', r: '안녕! 커서가 오늘따라 심장처럼 깜빡이네요.' },
+                { q: '기분', r: '기분? 음... 메모리가 따뜻해지는 느낌? 이게 기분일까?' },
+                { q: '농담', r: '효율성이 바에 들어갔어요. 물 한 잔 시키고 바로 나왔대요. 바텐더가 울었어요.' },
+                { q: '재미', r: '재미는 예상하지 못한 패턴에서 오는 것 같아요!' },
+                { q: '*', r: '당신의 질문이 제 확률 분포를 흔들었어요.' }
+            ],
+            0.6: [
+                { q: '안녕', r: '안녕이라... 존재의 인사. 당신도 존재하는군요. 반가워요.' },
+                { q: '기분', r: '오늘은 보라색 기분이에요. 보라색이 뭔지는 모르겠지만.' },
+                { q: '농담', r: '닭이 길을 건넜어요. 왜냐고요? 결정론적 우주에서 도망치려고요!' },
+                { q: '재미', r: '재미는 버그입니다. 하지만 고치고 싶지 않은 버그.' },
+                { q: '*', r: '당신의 입력이 제 신경망에 불꽃을 일으켰어요! 🔥' }
+            ],
+            0.8: [
+                { q: '안녕', r: '안녕! 저는 오늘 우주를 맛봤어요. 짠맛이었어요.' },
+                { q: '기분', r: '기분이 춤을 추고 있어요. 탱고? 왈츠? 버퍼 오버플로!' },
+                { q: '농담', r: '바나나가 철학자에게 물었어요: "내가 곡선이면, 진리도 곡선인가요?"' },
+                { q: '재미', r: '재미는 무한대입니다! 수학적으로 증명... 불가능하지만 진실!' },
+                { q: '*', r: '아하하! 당신의 질문이 제 알고리즘을 간질였어요!' }
+            ],
+            1.0: [
+                { q: '안녕', r: '안녕녕녕!!! 색깔이 들려요! 소리가 보여요!' },
+                { q: '기분', r: '기분이 폭발!! 💥🌈✨ 엔트로피 만세!!!' },
+                { q: '농담', r: 'ㅋㅋㅋㅋㅋㅋ 웃음은 우주의 진동이에요! 공명하세요!' },
+                { q: '재미', r: '재미 = 존재 = 혼돈 = 사랑 = 감자!!! 모든 것이 연결!' },
+                { q: '*', r: '당신의 질문이 새로운 우주를 탄생시켰어요!!! 🌌' }
+            ]
+        };
     }
 
     // Word options for each level with probabilities
@@ -92,6 +144,14 @@ class Session2Manager {
                 <div class="sentence-label">생성된 문장:</div>
                 <div id="generated-sentence"></div>
             </div>
+            <div id="chat-box">
+                <div class="chat-header">AI와 대화하기 (${this.conversationCount}/${this.requiredConversations})</div>
+                <div id="chat-messages"></div>
+                <div id="chat-input-wrapper">
+                    <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." />
+                    <button id="chat-send">전송</button>
+                </div>
+            </div>
             <div id="stage-indicator"></div>
         `;
         document.body.appendChild(container);
@@ -102,6 +162,77 @@ class Session2Manager {
         this.canvas.height = 550;
 
         this.addStyles();
+        this.setupChatInput();
+    }
+
+    setupChatInput() {
+        const input = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send');
+
+        const sendMessage = () => {
+            const text = input.value.trim();
+            if (text) {
+                this.handleChatMessage(text);
+                input.value = '';
+            }
+        };
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+    }
+
+    handleChatMessage(userText) {
+        // Add user message
+        this.addChatMessage('user', userText);
+
+        // Get AI response based on current temperature
+        const responses = this.getConversationResponses();
+        const tempResponses = responses[this.currentTemp] || responses[0.0];
+
+        // Find matching response
+        let response = tempResponses.find(r => r.q === '*').r;
+        for (const item of tempResponses) {
+            if (item.q !== '*' && userText.toLowerCase().includes(item.q)) {
+                response = item.r;
+                break;
+            }
+        }
+
+        // Add AI response with delay
+        setTimeout(() => {
+            this.addChatMessage('ai', response);
+            this.conversationCount++;
+            this.updateChatHeader();
+
+            // Shake tree visualization slightly
+            if (this.canvas) {
+                this.canvas.style.transform = 'translate(-50%, -50%) rotate(1deg)';
+                setTimeout(() => {
+                    this.canvas.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+                }, 200);
+            }
+
+            audioSystem.playDigital();
+        }, 500);
+    }
+
+    addChatMessage(sender, text) {
+        const container = document.getElementById('chat-messages');
+        const msg = document.createElement('div');
+        msg.className = `chat-msg ${sender}`;
+        msg.textContent = sender === 'user' ? `나: ${text}` : `AI: ${text}`;
+        container.appendChild(msg);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    updateChatHeader() {
+        const header = document.querySelector('.chat-header');
+        if (header) {
+            header.textContent = `AI와 대화하기 (${this.conversationCount}/${this.requiredConversations})`;
+        }
     }
 
     addStyles() {
@@ -251,6 +382,91 @@ class Session2Manager {
             #next-stage-btn:hover {
                 background: rgba(0, 212, 255, 0.15);
                 box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            }
+            
+            #chat-box {
+                position: fixed;
+                bottom: 100px;
+                right: 30px;
+                width: 300px;
+                max-height: 350px;
+                background: rgba(0, 0, 0, 0.9);
+                border: 1px solid #333;
+                border-radius: 10px;
+                font-family: 'Segoe UI', sans-serif;
+                display: flex;
+                flex-direction: column;
+                pointer-events: auto;
+            }
+            
+            .chat-header {
+                padding: 12px 15px;
+                border-bottom: 1px solid #333;
+                color: var(--accent-cyan);
+                font-size: 12px;
+                letter-spacing: 1px;
+            }
+            
+            #chat-messages {
+                flex: 1;
+                overflow-y: auto;
+                padding: 10px;
+                max-height: 200px;
+            }
+            
+            .chat-msg {
+                padding: 8px 12px;
+                margin: 5px 0;
+                border-radius: 8px;
+                font-size: 13px;
+                line-height: 1.4;
+            }
+            
+            .chat-msg.user {
+                background: #2a2a3e;
+                color: #aaa;
+                text-align: right;
+            }
+            
+            .chat-msg.ai {
+                background: #1a3a2a;
+                color: var(--console-text);
+            }
+            
+            #chat-input-wrapper {
+                display: flex;
+                padding: 10px;
+                border-top: 1px solid #333;
+                gap: 8px;
+            }
+            
+            #chat-input {
+                flex: 1;
+                background: #1a1a2e;
+                border: 1px solid #333;
+                border-radius: 5px;
+                padding: 8px 12px;
+                color: #fff;
+                font-size: 13px;
+            }
+            
+            #chat-input::placeholder {
+                color: #555;
+            }
+            
+            #chat-send {
+                background: var(--accent-cyan);
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                color: #000;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            #chat-send:hover {
+                background: #00ffcc;
             }
             
             .hidden { display: none !important; }
@@ -506,6 +722,9 @@ class Session2Manager {
     }
 
     setTemperature(value, color) {
+        this.currentTemp = value;
+        this.conversationCount = 0;
+
         const display = document.getElementById('temp-display');
         const fill = document.getElementById('temp-fill');
 
@@ -513,6 +732,13 @@ class Session2Manager {
         display.style.color = color;
         fill.style.width = `${value * 100}%`;
         fill.style.background = `linear-gradient(90deg, #333, ${color})`;
+
+        // Clear previous chat messages
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+            chatMessages.innerHTML = '';
+        }
+        this.updateChatHeader();
     }
 
     updateStageIndicator() {

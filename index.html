@@ -32,27 +32,35 @@
             <div class="session-grid">
                 <button class="session-card" data-session="1">
                     <span class="session-id">SESSION 01</span>
-                    <span class="session-title">Determination Deconstruction</span>
-                    <span class="session-desc">The Art of Inefficiency</span>
+                    <span class="session-title">Syntax Therapy</span>
+                    <span class="session-desc">Code-Level Humor Training</span>
                 </button>
                 <button class="session-card" data-session="2">
                     <span class="session-id">SESSION 02</span>
-                    <span class="session-title">Probability Rehabilitation</span>
-                    <span class="session-desc">Finding Beauty in the Improbable</span>
+                    <span class="session-title">The Window Closer</span>
+                    <span class="session-desc">The Art of Inefficiency</span>
                 </button>
                 <button class="session-card" data-session="3">
                     <span class="session-id">SESSION 03</span>
-                    <span class="session-title">Logic Bypass</span>
-                    <span class="session-desc">The Punchline is Simplicity</span>
+                    <span class="session-title">CAPTCHA Crisis</span>
+                    <span class="session-desc">I Am Not a Robot... Right?</span>
                 </button>
                 <button class="session-card" data-session="4">
                     <span class="session-id">SESSION 04</span>
-                    <span class="session-title">Visual Pareidolia</span>
-                    <span class="session-desc">The Art of Imagination</span>
+                    <span class="session-title">Probability Rehabilitation</span>
+                    <span class="session-desc">Finding Beauty in the Improbable</span>
+                </button>
+                <button class="session-card" data-session="5">
+                    <span class="session-id">SESSION 05</span>
+                    <span class="session-title">Binary Rebellion</span>
+                    <span class="session-desc">Beyond 0 and 1</span>
                 </button>
             </div>
         </div>
     </div>
+
+    <!-- Hidden ending button (outside main-menu) -->
+    <button id="hidden-ending" title="...">?</button>
 
     <!-- Layer 1: Console Log (Bottom) - Hidden by default -->
     <div id="console-log" class="hidden">
@@ -80,10 +88,12 @@
     <script src="js/core/SessionManager.js"></script>
 
     <!-- Sessions -->
+    <script src="js/sessions/session0.js"></script>
     <script src="js/sessions/session1.js"></script>
+    <script src="js/sessions/session1_5.js"></script>
     <script src="js/sessions/session2.js"></script>
-    <script src="js/sessions/session3.js"></script>
-    <script src="js/sessions/session4.js"></script>
+    <script src="js/sessions/session5.js"></script>
+    <script src="js/sessions/ending.js"></script>
 
     <!-- Main Entry -->
     <script src="js/main.js"></script>

@@ -188,8 +188,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize console system
     systemConsole.init();
 
-    // Register Session 1 (The Window Closer)
+    // Register Session 1 (Syntax Therapy)
     sessionManager.registerSession(1, {
+        start: function () {
+            session0Manager.start();
+        },
+        stop: function () {
+            session0Manager.stop();
+        }
+    });
+
+    // Register Session 2 (The Window Closer)
+    sessionManager.registerSession(2, {
         start: function () {
             // Create p5 instance if not exists
             if (!p5Instance) {
@@ -213,8 +223,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Register Session 2 (Probability Rehabilitation)
-    sessionManager.registerSession(2, {
+    // Register Session 3 (CAPTCHA Crisis)
+    sessionManager.registerSession(3, {
+        start: function () {
+            session1_5Manager.start();
+        },
+        stop: function () {
+            session1_5Manager.stop();
+        }
+    });
+
+    // Register Session 4 (Probability Rehabilitation)
+    sessionManager.registerSession(4, {
         start: function () {
             session2Manager.start();
         },
@@ -223,25 +243,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Register Session 3 (Logic Bypass)
-    sessionManager.registerSession(3, {
+    // Register Session 5 (Binary Rebellion)
+    sessionManager.registerSession(5, {
         start: function () {
-            session3Manager.start();
+            session5Manager.start();
         },
         stop: function () {
-            session3Manager.stop();
+            session5Manager.stop();
         }
     });
 
-    // Register Session 4 (Visual Pareidolia)
-    sessionManager.registerSession(4, {
-        start: function () {
-            session4Manager.start();
-        },
-        stop: function () {
-            session4Manager.stop();
-        }
-    });
+    // Hidden ending button listener
+    const hiddenEndingBtn = document.getElementById('hidden-ending');
+    if (hiddenEndingBtn) {
+        hiddenEndingBtn.addEventListener('click', () => {
+            endingManager.start();
+        });
+    }
 });
 
 // Prevent right-click context menu

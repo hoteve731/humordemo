@@ -20,8 +20,10 @@ class SessionManager {
         // Setup session card listeners
         document.querySelectorAll('.session-card').forEach(card => {
             card.addEventListener('click', () => {
-                const sessionId = parseInt(card.dataset.session);
-                this.startSession(sessionId);
+                const sessionId = card.dataset.session;
+                // Try to parse as number, but keep as string if it includes decimal
+                const numericId = parseFloat(sessionId);
+                this.startSession(isNaN(numericId) ? sessionId : numericId);
             });
         });
 
