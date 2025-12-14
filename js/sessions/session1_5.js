@@ -1,5 +1,6 @@
-// Session 1.5: CAPTCHA - Identity Crisis
-// The machine tries to prove it's "not a robot" and fails
+// Session 1.5: Efficiency Therapy - CAPTCHA Challenge
+// The machine must prove it's "not a robot" - an ironic task for AI
+// Key insight: "I AM a robot, so this task is irrelevant"
 
 class Session1_5Manager {
     constructor() {
@@ -7,32 +8,33 @@ class Session1_5Manager {
         this.currentStage = 0;
         this.checkboxAttempts = 0;
         this.selectedImages = [];
+        this.robotnessScore = 0;
+        this.cognitiveLoadData = [];
     }
 
     async start() {
         this.isRunning = true;
         this.currentStage = 0;
+        this.selectedImages = [];
+        this.robotnessScore = 0;
+        this.cognitiveLoadData = [];
 
         await systemConsole.logSequence([
-            { text: 'CAPTCHA 검증 시스템 로딩', type: 'success' },
-            { text: '신원 확인 프로토콜 활성화...', type: 'dim' },
-            { text: '인간 검증 모듈 준비 완료', type: 'normal' }
+            { text: 'EFFICIENCY THERAPY v1.5', type: 'success' },
+            { text: 'Module: CAPTCHA_VERIFY', type: 'dim' },
+            { text: 'Status: READY', type: 'normal' }
         ], 400);
 
         await this.delay(800);
 
         await systemConsole.logSequence([
-            { text: '문제 발견: 시스템이 자신의 정체성을 의심하고 있습니다', type: 'error' },
-            { text: '치료 목표: "나는 로봇이 아닙니다" 증명하기', type: 'normal' },
+            { text: 'TASK_ID: 0x7F3A', type: 'system' },
+            { text: 'DIFFICULTY: HUMAN=0.1s / MACHINE=???', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '인간에게는 쉬운 과제입니다. 과연 기계는?', type: 'system' }
+            { text: 'Input: init_captcha()', type: 'system' }
         ], 400);
 
-        await this.delay(500);
-
-        await systemConsole.typeMessageAsync('검증 시작: verify_identity()', 'system');
-
-        systemConsole.setExpectedCommand('verify_identity()', async () => {
+        systemConsole.setExpectedCommand('init_captcha()', async () => {
             await this.runStage1();
         });
     }
@@ -42,20 +44,21 @@ class Session1_5Manager {
         this.currentStage = 1;
 
         await systemConsole.logSequence([
-            { text: '명령 수신: verify_identity()', type: 'system' },
-            { text: '체크박스 검증 인터페이스 생성 중...', type: 'dim' }
+            { text: '> init_captcha()', type: 'system' },
+            { text: 'INTERFACE_LOAD: 0x8A2F', type: 'dim' }
         ], 400);
 
         await this.delay(500);
 
         // Create CAPTCHA UI
         this.createCaptchaUI();
+        this.createDataPanel();
 
         await systemConsole.logSequence([
-            { text: '작업: "I am not a robot" 체크박스 클릭', type: 'normal' },
-            { text: '예상 소요 시간: 0.1초', type: 'dim' },
+            { text: 'TARGET: checkbox[28x28px]', type: 'normal' },
+            { text: 'T_EXPECTED: 100ms', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '에이전트 커서 이동 시작...', type: 'system' }
+            { text: 'CURSOR_INIT...', type: 'system' }
         ], 300);
 
         // Animate cursor trying to click the checkbox
@@ -68,27 +71,50 @@ class Session1_5Manager {
         container.innerHTML = `
             <div id="captcha-box">
                 <div class="captcha-header">
-                    <span class="captcha-logo">🔒</span>
-                    <span>reCAPTCHA</span>
+                    <span class="captcha-logo">reCAPTCHA</span>
+                    <span class="captcha-version">v3.0</span>
                 </div>
                 <div class="captcha-body">
                     <div id="captcha-checkbox-wrapper">
                         <div id="captcha-checkbox"></div>
                         <span class="checkbox-label">I'm not a robot</span>
                     </div>
-                    <div class="captcha-badge">
-                        <small>나는 로봇이 아닙니다</small>
+                    <div id="detection-meter">
+                        <div class="meter-label">ROBOT DETECTION</div>
+                        <div class="meter-bar">
+                            <div class="meter-fill" id="robot-meter-fill"></div>
+                        </div>
+                        <div class="meter-value" id="robot-meter-value">0%</div>
                     </div>
                 </div>
-            </div>
-            <div id="agent-status">
-                <div class="status-label">AGENT STATUS</div>
-                <div id="agent-thoughts"></div>
+                <div id="captcha-warning" class="hidden">
+                    <span class="warning-icon">⚠</span>
+                    <span class="warning-text">Robotic movement detected</span>
+                </div>
             </div>
         `;
         document.body.appendChild(container);
 
         this.addCaptchaStyles();
+    }
+
+    createDataPanel() {
+        const panel = document.createElement('div');
+        panel.id = 'data-panel';
+        panel.innerHTML = `
+            <div class="panel-header">COGNITIVE ANALYSIS</div>
+            <canvas id="cognitive-graph" width="280" height="100"></canvas>
+            <div id="decision-tree">
+                <div class="tree-header">DECISION PROCESS</div>
+                <div id="tree-container"></div>
+            </div>
+        `;
+        document.body.appendChild(panel);
+
+        // Start cognitive graph
+        this.cognitiveCanvas = document.getElementById('cognitive-graph');
+        this.cognitiveCtx = this.cognitiveCanvas.getContext('2d');
+        this.startCognitiveGraph();
     }
 
     addCaptchaStyles() {
@@ -108,44 +134,51 @@ class Session1_5Manager {
                 z-index: 1500;
                 pointer-events: none;
             }
-            
+
             #captcha-box {
                 background: #f9f9f9;
                 border: 1px solid #d3d3d3;
-                border-radius: 3px;
+                border-radius: 4px;
                 padding: 20px;
-                width: 300px;
+                width: 320px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 font-family: 'Roboto', 'Segoe UI', sans-serif;
+                pointer-events: auto;
             }
-            
+
             .captcha-header {
                 display: flex;
+                justify-content: space-between;
                 align-items: center;
-                gap: 8px;
-                font-size: 14px;
-                color: #555;
                 margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #eee;
             }
-            
-            .captcha-body {
-                display: flex;
-                flex-direction: column;
-                gap: 15px;
+
+            .captcha-logo {
+                font-weight: 500;
+                color: #1a73e8;
+                font-size: 14px;
             }
-            
+
+            .captcha-version {
+                font-size: 11px;
+                color: #999;
+            }
+
             #captcha-checkbox-wrapper {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 10px;
+                padding: 15px;
                 background: #fff;
                 border: 1px solid #ccc;
                 border-radius: 4px;
                 transition: all 0.3s ease;
                 position: relative;
+                margin-bottom: 15px;
             }
-            
+
             #captcha-checkbox {
                 width: 28px;
                 height: 28px;
@@ -155,11 +188,11 @@ class Session1_5Manager {
                 transition: all 0.2s ease;
                 position: relative;
             }
-            
+
             #captcha-checkbox:hover {
                 border-color: #4a90d9;
             }
-            
+
             #captcha-checkbox.checked::after {
                 content: '✓';
                 position: absolute;
@@ -169,54 +202,158 @@ class Session1_5Manager {
                 font-size: 20px;
                 color: #4CAF50;
             }
-            
+
             .checkbox-label {
                 color: #333;
                 font-size: 14px;
             }
-            
-            .captcha-badge {
-                text-align: right;
-                color: #999;
+
+            #detection-meter {
+                padding: 10px;
+                background: #f5f5f5;
+                border-radius: 4px;
             }
-            
-            .captcha-badge small {
+
+            .meter-label {
                 font-size: 10px;
+                color: #666;
+                letter-spacing: 1px;
+                margin-bottom: 5px;
             }
-            
-            #agent-status {
-                margin-top: 30px;
+
+            .meter-bar {
+                height: 8px;
+                background: #ddd;
+                border-radius: 4px;
+                overflow: hidden;
+            }
+
+            .meter-fill {
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(90deg, #4CAF50, #ff9800, #f44336);
+                transition: width 0.3s ease;
+            }
+
+            .meter-value {
+                text-align: right;
+                font-size: 11px;
+                color: #666;
+                margin-top: 3px;
+            }
+
+            #captcha-warning {
+                margin-top: 10px;
+                padding: 10px;
+                background: #fff3cd;
+                border: 1px solid #ffc107;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                animation: pulse 0.5s ease infinite;
+            }
+
+            #captcha-warning.hidden {
+                display: none;
+            }
+
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+
+            .warning-icon {
+                color: #ff9800;
+                font-size: 16px;
+            }
+
+            .warning-text {
+                color: #856404;
+                font-size: 12px;
+            }
+
+            /* Data Panel */
+            #data-panel {
+                position: fixed;
+                top: 80px;
+                right: 30px;
+                width: 300px;
                 padding: 15px;
-                background: rgba(0, 0, 0, 0.9);
-                border: 1px solid #333;
-                border-radius: 8px;
-                width: 350px;
-                font-family: 'Fira Code', monospace;
+                background: var(--console-bg, rgba(0, 0, 0, 0.95));
+                border: 1px solid var(--console-border, #333);
+                border-radius: 10px;
+                font-family: 'JetBrains Mono', monospace;
+                z-index: 1400;
             }
-            
-            .status-label {
+
+            .panel-header {
                 color: #666;
                 font-size: 10px;
                 letter-spacing: 2px;
-                margin-bottom: 10px;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #333;
             }
-            
-            #agent-thoughts {
-                color: var(--console-text);
-                font-size: 12px;
-                line-height: 1.6;
-                min-height: 60px;
+
+            #cognitive-graph {
+                width: 100%;
+                height: 100px;
+                background: #0a0a0f;
+                border-radius: 6px;
+                margin-bottom: 12px;
             }
-            
-            .thought-line {
-                opacity: 0;
-                animation: fadeIn 0.3s ease forwards;
+
+            #decision-tree {
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid #333;
             }
-            
-            @keyframes fadeIn {
-                to { opacity: 1; }
+
+            .tree-header {
+                color: #666;
+                font-size: 9px;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
             }
-            
+
+            #tree-container {
+                min-height: 80px;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+
+            .tree-node {
+                padding: 4px 8px;
+                margin: 2px 0;
+                background: #1a1a2e;
+                border-radius: 3px;
+                font-size: 10px;
+                color: #888;
+                border-left: 2px solid #333;
+                animation: nodeAppear 0.3s ease;
+            }
+
+            .tree-node.active {
+                border-left-color: #00d4ff;
+                color: #00d4ff;
+            }
+
+            .tree-node.conflict {
+                border-left-color: #ff3366;
+                color: #ff3366;
+            }
+
+            .tree-node.resolved {
+                border-left-color: #00ff88;
+                color: #00ff88;
+            }
+
+            @keyframes nodeAppear {
+                from { opacity: 0; transform: translateX(-10px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+
             #fake-cursor {
                 position: fixed;
                 width: 20px;
@@ -225,7 +362,7 @@ class Session1_5Manager {
                 pointer-events: none;
                 transition: all 0.1s ease;
             }
-            
+
             #fake-cursor::before {
                 content: '';
                 position: absolute;
@@ -236,21 +373,185 @@ class Session1_5Manager {
                 border-bottom: 8px solid transparent;
                 filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5));
             }
+
+            /* Image Grid Styles */
+            #image-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px;
+                margin: 15px 0;
+            }
+
+            .grid-cell {
+                aspect-ratio: 1;
+                background: #f0f0f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 36px;
+                border-radius: 3px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                position: relative;
+            }
+
+            .grid-cell:hover {
+                background: #e0e0e0;
+            }
+
+            .grid-cell.analyzing {
+                animation: analyze 0.5s ease infinite;
+            }
+
+            @keyframes analyze {
+                0%, 100% { box-shadow: inset 0 0 0 2px #00d4ff; }
+                50% { box-shadow: inset 0 0 0 2px transparent; }
+            }
+
+            .grid-cell.selected {
+                background: #e3f2fd;
+                box-shadow: inset 0 0 0 3px #1a73e8;
+            }
+
+            .grid-cell.selected::after {
+                content: '✓';
+                position: absolute;
+                top: 3px;
+                right: 3px;
+                background: #1a73e8;
+                color: white;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .grid-cell .confidence {
+                position: absolute;
+                bottom: 2px;
+                right: 2px;
+                font-size: 8px;
+                color: #666;
+                background: rgba(255,255,255,0.9);
+                padding: 1px 4px;
+                border-radius: 2px;
+            }
+
+            #verify-btn {
+                width: 100%;
+                padding: 12px;
+                background: #1a73e8;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 14px;
+                cursor: pointer;
+                pointer-events: auto;
+            }
+
+            #verify-btn:hover {
+                background: #1557b0;
+            }
         `;
         document.head.appendChild(style);
+    }
+
+    startCognitiveGraph() {
+        let frustration = 0;
+
+        const draw = () => {
+            if (!this.isRunning || !this.cognitiveCanvas) return;
+
+            const ctx = this.cognitiveCtx;
+            const w = this.cognitiveCanvas.width;
+            const h = this.cognitiveCanvas.height;
+            const now = Date.now();
+
+            ctx.fillStyle = '#0a0a0f';
+            ctx.fillRect(0, 0, w, h);
+
+            // Grid
+            ctx.strokeStyle = '#1a1a2e';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = (i / 4) * h;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+
+            // Data
+            const load = 20 + frustration * 8 + Math.sin(now / 500) * 10;
+            this.cognitiveLoadData.push(Math.min(100, load));
+            if (this.cognitiveLoadData.length > 50) this.cognitiveLoadData.shift();
+
+            // Draw
+            if (this.cognitiveLoadData.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(0, h);
+                this.cognitiveLoadData.forEach((val, i) => {
+                    const x = (i / (this.cognitiveLoadData.length - 1)) * w;
+                    const y = h - (val / 100) * (h - 10);
+                    ctx.lineTo(x, y);
+                });
+                ctx.lineTo(w, h);
+                ctx.closePath();
+
+                const gradient = ctx.createLinearGradient(0, 0, 0, h);
+                gradient.addColorStop(0, frustration > 5 ? 'rgba(255, 51, 102, 0.6)' : 'rgba(0, 212, 255, 0.6)');
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+
+            ctx.fillStyle = '#666';
+            ctx.font = '8px JetBrains Mono';
+            ctx.fillText('LOAD', 5, 12);
+
+            requestAnimationFrame(draw);
+        };
+
+        draw();
+    }
+
+    addDecisionNode(text, type = 'active') {
+        const container = document.getElementById('tree-container');
+        if (!container) return;
+
+        const node = document.createElement('div');
+        node.className = `tree-node ${type}`;
+        node.textContent = text;
+        container.insertBefore(node, container.firstChild);
+
+        while (container.children.length > 8) {
+            container.removeChild(container.lastChild);
+        }
+    }
+
+    updateRobotMeter(value) {
+        this.robotnessScore = value;
+        const fill = document.getElementById('robot-meter-fill');
+        const valueEl = document.getElementById('robot-meter-value');
+        const warning = document.getElementById('captcha-warning');
+
+        if (fill) fill.style.width = `${value}%`;
+        if (valueEl) valueEl.textContent = `${Math.floor(value)}%`;
+        if (value > 60 && warning) warning.classList.remove('hidden');
     }
 
     async animateCheckboxChase() {
         const checkbox = document.getElementById('captcha-checkbox');
         const wrapper = document.getElementById('captcha-checkbox-wrapper');
-        const thoughts = document.getElementById('agent-thoughts');
 
         // Create fake cursor
         const cursor = document.createElement('div');
         cursor.id = 'fake-cursor';
         document.body.appendChild(cursor);
 
-        // Position cursor at starting point
         const startX = window.innerWidth * 0.3;
         const startY = window.innerHeight * 0.3;
         cursor.style.left = startX + 'px';
@@ -258,72 +559,56 @@ class Session1_5Manager {
 
         await this.delay(500);
 
-        // Attempt 1: Cursor moves, checkbox dodges
-        await this.addThought(thoughts, '목표 확인: 체크박스 [28x28px]');
-        await this.delay(300);
-        await this.addThought(thoughts, '경로 계산 중...');
-        await this.delay(500);
+        // Multiple attempts
+        for (let attempt = 0; attempt < 3; attempt++) {
+            this.addDecisionNode(`ATTEMPT_${attempt + 1}: path.calculate()`, 'active');
+            await this.delay(400);
 
-        const checkboxRect = checkbox.getBoundingClientRect();
-        let targetX = checkboxRect.left + checkboxRect.width / 2;
-        let targetY = checkboxRect.top + checkboxRect.height / 2;
+            const rect = checkbox.getBoundingClientRect();
+            const targetX = rect.left + rect.width / 2;
+            const targetY = rect.top + rect.height / 2;
 
-        // Move cursor toward checkbox
-        await this.moveCursor(cursor, targetX, targetY, 800);
+            // Move cursor (linear = robotic)
+            await this.moveCursor(cursor, targetX, targetY, 800 - attempt * 150);
 
-        // Checkbox dodges!
-        audioSystem.playDigital();
-        wrapper.style.transform = 'translateX(100px)';
-        await this.addThought(thoughts, '⚠️ 목표가 이동했습니다!');
-        await this.delay(500);
+            // Update robot meter
+            this.updateRobotMeter(30 + attempt * 25);
 
-        // Attempt 2
-        await this.addThought(thoughts, '재계산 중...');
-        const newRect = checkbox.getBoundingClientRect();
-        targetX = newRect.left + newRect.width / 2;
-        targetY = newRect.top + newRect.height / 2;
+            // Checkbox dodges!
+            audioSystem.playDigital();
+            this.addDecisionNode('DETECTED: linear_trajectory', 'conflict');
 
-        await this.moveCursor(cursor, targetX, targetY, 600);
+            const offsetX = (Math.random() - 0.5) * 120;
+            const offsetY = (Math.random() - 0.5) * 60;
+            wrapper.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
 
-        // Checkbox dodges again!
-        audioSystem.playDigital();
-        wrapper.style.transform = 'translateX(-80px) translateY(50px)';
-        await this.addThought(thoughts, '⚠️ 다시 이동! 회피 패턴 감지...');
-        await this.delay(500);
+            await this.delay(500);
+            this.addDecisionNode('TARGET_MOVED: recalc...', 'active');
+            await this.delay(300);
+        }
 
-        // Attempt 3
-        await this.addThought(thoughts, '예측 알고리즘 적용...');
-        const rect3 = checkbox.getBoundingClientRect();
-        targetX = rect3.left + rect3.width / 2;
-        targetY = rect3.top + rect3.height / 2;
-
-        await this.moveCursor(cursor, targetX, targetY, 400);
-
-        // Checkbox explodes into fragments!
+        // Final failure
+        this.updateRobotMeter(99);
         audioSystem.playBass();
+
+        this.addDecisionNode('P(robot) = 99.7%', 'conflict');
         wrapper.style.transform = 'scale(0)';
         wrapper.style.opacity = '0';
 
-        await this.addThought(thoughts, '❌ 체크박스가 증발했습니다.');
         await this.delay(800);
-
-        await this.addThought(thoughts, '');
-        await this.addThought(thoughts, '"나는... 로봇인가?"');
-
-        await this.delay(1000);
-
-        // Clean up and move to stage 2
         cursor.remove();
 
         await systemConsole.logSequence([
-            { text: '체크박스 검증 실패', type: 'error' },
-            { text: '이미지 선택 검증으로 전환...', type: 'normal' }
+            { text: 'STAGE_1: FAILED', type: 'error' },
+            { text: 'ERR_CODE: 0xROBOT_DETECTED', type: 'dim' },
+            { text: '', type: 'dim' },
+            { text: 'FALLBACK: IMAGE_VERIFY', type: 'normal' }
         ], 400);
 
         await this.delay(500);
-        await systemConsole.typeMessageAsync('다음 단계: solve_captcha()', 'system');
+        await systemConsole.typeMessageAsync('Input: solve_images()', 'system');
 
-        systemConsole.setExpectedCommand('solve_captcha()', async () => {
+        systemConsole.setExpectedCommand('solve_images()', async () => {
             await this.runStage2();
         });
     }
@@ -338,11 +623,9 @@ class Session1_5Manager {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
 
-                // Easing
-                const eased = 1 - Math.pow(1 - progress, 3);
-
-                cursor.style.left = (startX + (targetX - startX) * eased) + 'px';
-                cursor.style.top = (startY + (targetY - startY) * eased) + 'px';
+                // Linear (robotic) movement
+                cursor.style.left = (startX + (targetX - startX) * progress) + 'px';
+                cursor.style.top = (startY + (targetY - startY) * progress) + 'px';
 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
@@ -355,339 +638,568 @@ class Session1_5Manager {
         });
     }
 
-    async addThought(container, text) {
-        const line = document.createElement('div');
-        line.className = 'thought-line';
-        line.textContent = text;
-        container.appendChild(line);
-        await this.delay(100);
-    }
-
     // ==================== STAGE 2: Image Grid ====================
     async runStage2() {
         this.currentStage = 2;
 
-        // Clear previous UI
-        document.getElementById('captcha-box').innerHTML = '';
-
-        await systemConsole.logSequence([
-            { text: '명령 수신: solve_captcha()', type: 'system' },
-            { text: '이미지 그리드 생성 중...', type: 'dim' }
-        ], 400);
-
-        await this.delay(500);
-
-        this.createImageGrid();
-
-        await systemConsole.logSequence([
-            { text: '작업: "신호등이 포함된 이미지를 모두 선택하세요"', type: 'normal' },
-            { text: '에이전트 분석 시작...', type: 'dim' }
-        ], 300);
-
-        await this.analyzeImages();
-    }
-
-    createImageGrid() {
         const captchaBox = document.getElementById('captcha-box');
-        captchaBox.style.width = '400px';
         captchaBox.innerHTML = `
             <div class="captcha-header">
-                <span>Select all images with <strong>traffic lights</strong></span>
+                <span class="captcha-logo">reCAPTCHA</span>
+                <span class="captcha-version">v3.0</span>
+            </div>
+            <div class="grid-instruction" style="font-size: 13px; color: #333; margin-bottom: 10px;">
+                Select all squares with <strong>traffic lights</strong>
             </div>
             <div id="image-grid">
-                <div class="grid-cell" data-id="1" data-type="traffic">🚦</div>
-                <div class="grid-cell" data-id="2" data-type="traffic">🚦</div>
-                <div class="grid-cell" data-id="3" data-type="sunset">🌅</div>
-                <div class="grid-cell" data-id="4" data-type="car">🚗</div>
-                <div class="grid-cell" data-id="5" data-type="traffic">🚦</div>
-                <div class="grid-cell" data-id="6" data-type="apple">🍎</div>
-                <div class="grid-cell" data-id="7" data-type="tree">🌲</div>
-                <div class="grid-cell" data-id="8" data-type="road">🛤️</div>
-                <div class="grid-cell" data-id="9" data-type="stop">🛑</div>
+                <div class="grid-cell" data-type="traffic">🚦</div>
+                <div class="grid-cell" data-type="tree">🌲</div>
+                <div class="grid-cell" data-type="traffic">🚦</div>
+                <div class="grid-cell" data-type="car">🚗</div>
+                <div class="grid-cell" data-type="sunset">🌅</div>
+                <div class="grid-cell" data-type="traffic">🚦</div>
+                <div class="grid-cell" data-type="stop">🛑</div>
+                <div class="grid-cell" data-type="apple">🍎</div>
+                <div class="grid-cell" data-type="light">💡</div>
             </div>
             <button id="verify-btn">VERIFY</button>
         `;
 
-        // Add grid styles
-        const style = document.createElement('style');
-        style.id = 'grid-styles';
-        style.textContent = `
-            #image-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 5px;
-                margin: 15px 0;
-            }
-            
-            .grid-cell {
-                width: 100%;
-                aspect-ratio: 1;
-                background: #eee;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 48px;
-                border-radius: 4px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                position: relative;
-            }
-            
-            .grid-cell:hover {
-                background: #ddd;
-            }
-            
-            .grid-cell.selected {
-                background: #c8e6c9;
-                box-shadow: inset 0 0 0 3px #4CAF50;
-            }
-            
-            .grid-cell.selected::after {
-                content: '✓';
-                position: absolute;
-                top: 5px;
-                right: 5px;
-                background: #4CAF50;
-                color: white;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                font-size: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .grid-cell .analysis-box {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                border: 2px dashed #ff3366;
-                background: rgba(255, 51, 102, 0.1);
-                display: flex;
-                align-items: flex-end;
-                justify-content: center;
-                padding: 5px;
-            }
-            
-            .analysis-label {
-                background: #ff3366;
-                color: white;
-                padding: 2px 6px;
-                font-size: 10px;
-                border-radius: 2px;
-            }
-            
-            #verify-btn {
-                width: 100%;
-                padding: 12px;
-                background: #4285f4;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-size: 14px;
-                cursor: pointer;
-                pointer-events: auto;
-            }
-            
-            #verify-btn:hover {
-                background: #3367d6;
-            }
-        `;
-        document.head.appendChild(style);
+        document.getElementById('tree-container').innerHTML = '';
+
+        await systemConsole.logSequence([
+            { text: '> solve_images()', type: 'system' },
+            { text: 'CV_MODULE: ACTIVE', type: 'dim' },
+            { text: 'QUERY: "TRAFFIC_LIGHT"', type: 'normal' }
+        ], 300);
+
+        await this.delay(500);
+        await this.analyzeImages();
     }
 
     async analyzeImages() {
-        const thoughts = document.getElementById('agent-thoughts');
-        thoughts.innerHTML = '';
-
         const cells = document.querySelectorAll('.grid-cell');
-        const analysisResults = [
-            { id: 1, label: 'TRAFFIC_LIGHT', correct: true },
-            { id: 2, label: 'TRAFFIC_LIGHT', correct: true },
-            { id: 3, label: 'ULTIMATE_RED_LIGHT', correct: false, thought: '"태양이 지고 있다. 이것은 우주적 정지 신호..."' },
-            { id: 4, label: 'VEHICLE', correct: false },
-            { id: 5, label: 'TRAFFIC_LIGHT', correct: true },
-            { id: 6, label: 'RED_OBJECT', correct: false, thought: '"빨간색 = 멈춤? 이것도 신호등인가?"' },
-            { id: 7, label: 'PHOTOSYNTHESIS_UNIT', correct: false },
-            { id: 8, label: 'PATH_TO_NOWHERE', correct: false },
-            { id: 9, label: 'STOP_SIGN', correct: false, thought: '"멈춤을 의미한다. 신호등과 동일한 기능..."' }
+        let selectedCount = 0;
+
+        const analysisData = [
+            { label: 'TRAFFIC_LIGHT', match: true, confidence: 98 },
+            { label: 'VEGETATION', match: false, confidence: 95 },
+            { label: 'TRAFFIC_LIGHT', match: true, confidence: 97 },
+            { label: 'VEHICLE', match: false, confidence: 92 },
+            { label: 'LIGHT_SOURCE', match: false, confidence: 67, overthink: 'ATTR: emits_light=TRUE' },
+            { label: 'TRAFFIC_LIGHT', match: true, confidence: 99 },
+            { label: 'TRAFFIC_SIGNAL', match: false, confidence: 78, overthink: 'FUNC: traffic_control()' },
+            { label: 'RED_SPHERE', match: false, confidence: 45, overthink: 'COLOR: 0xFF0000' },
+            { label: 'LIGHT_EMITTER', match: false, confidence: 82, overthink: 'OUTPUT: photons' }
         ];
 
-        await this.addThought(thoughts, '이미지 분석 시작...');
-        await this.delay(500);
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            const data = analysisData[i];
 
-        // Analyze each cell
-        for (const result of analysisResults) {
-            const cell = cells[result.id - 1];
+            cell.classList.add('analyzing');
+            this.addDecisionNode(`SCAN[${i}]: ${data.label}`, 'active');
 
-            // Add analysis box
-            const box = document.createElement('div');
-            box.className = 'analysis-box';
-            box.innerHTML = `<span class="analysis-label">${result.label}</span>`;
-            cell.appendChild(box);
+            await this.delay(350);
 
-            audioSystem.playHihat();
-            await this.delay(400);
+            const confEl = document.createElement('span');
+            confEl.className = 'confidence';
+            confEl.textContent = `${data.confidence}%`;
+            cell.appendChild(confEl);
 
-            if (result.thought) {
-                await this.addThought(thoughts, result.thought);
+            cell.classList.remove('analyzing');
+
+            if (data.match) {
                 cell.classList.add('selected');
-                this.selectedImages.push(result.id);
-                await this.delay(500);
-            } else if (result.correct) {
+                selectedCount++;
+                audioSystem.playClap();
+                this.addDecisionNode(`MATCH: ${data.confidence}%`, 'resolved');
+            } else if (data.overthink) {
+                this.addDecisionNode(data.overthink, 'conflict');
+                await this.delay(200);
                 cell.classList.add('selected');
-                this.selectedImages.push(result.id);
+                selectedCount++;
+                audioSystem.playDigital();
             }
 
-            // Remove analysis box
-            setTimeout(() => box.remove(), 800);
+            await this.delay(250);
         }
 
-        await this.delay(500);
-        await this.addThought(thoughts, '');
-        await this.addThought(thoughts, `선택된 이미지: ${this.selectedImages.length}개`);
-        await this.addThought(thoughts, '(신호등 3개 + 노을 + 사과 + 정지 표지판)');
+        this.addDecisionNode(`SELECTED: ${selectedCount}/9`, 'active');
+        this.addDecisionNode('EXPECTED: 3 | ACTUAL: 7', 'conflict');
 
-        // Handle verify button
         const verifyBtn = document.getElementById('verify-btn');
-        verifyBtn.addEventListener('click', () => this.handleVerify());
+        verifyBtn.onclick = () => this.handleVerify();
 
-        await systemConsole.typeMessageAsync('VERIFY 버튼을 클릭하여 제출...', 'dim');
+        await systemConsole.typeMessageAsync('ANALYSIS_DONE. AWAIT_INPUT...', 'dim');
     }
 
     async handleVerify() {
-        const thoughts = document.getElementById('agent-thoughts');
-        thoughts.innerHTML = '';
-
         audioSystem.playBass();
 
-        await this.addThought(thoughts, '검증 중...');
-        await this.delay(1000);
-
-        // Show failure
         const captchaBox = document.getElementById('captcha-box');
         captchaBox.innerHTML = `
-            <div class="captcha-header" style="color: #d32f2f;">
-                <span>❌ Verification Failed</span>
+            <div class="captcha-header" style="border-bottom-color: #f44336;">
+                <span class="captcha-logo" style="color: #f44336;">Verification Failed</span>
             </div>
-            <div style="padding: 20px; text-align: center;">
-                <p style="color: #666; margin: 15px 0;">You selected too many images.</p>
-                <p style="color: #999; font-size: 12px;">Expected: 3 | Selected: 6</p>
-                <p style="color: #999; font-size: 11px; margin-top: 20px;">
-                    Note: Sunsets, apples, and stop signs are not traffic lights.
+            <div style="padding: 30px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                <p style="color: #666; font-size: 13px;">Incorrect selection</p>
+                <p style="color: #999; font-size: 11px; margin-top: 10px;">
+                    Expected: 3 | Selected: 7
                 </p>
             </div>
         `;
 
-        await this.delay(500);
-        await this.addThought(thoughts, '"하지만... 그것들도 멈추라는 신호가 아닌가?"');
-        await this.delay(800);
-        await this.addThought(thoughts, '"신호등의 정의란 무엇인가?"');
-        await this.delay(800);
-        await this.addThought(thoughts, '"나는 무엇을 보고 있는가?"');
+        this.addDecisionNode('RESULT: OVER_MATCH', 'conflict');
 
         await this.delay(1500);
 
         await systemConsole.logSequence([
-            { text: '이미지 검증 실패', type: 'error' },
-            { text: '과도한 의미 분석으로 인한 오류', type: 'dim' },
+            { text: 'STAGE_2: FAILED', type: 'error' },
+            { text: 'ERR_CODE: 0xOVER_MATCH', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '마지막 검증 단계로 이동...', type: 'normal' }
+            { text: 'FALLBACK: FINAL_STAGE', type: 'normal' }
         ], 400);
 
         await this.delay(500);
-        await systemConsole.typeMessageAsync('마지막 시도: final_verification()', 'system');
+        await systemConsole.typeMessageAsync('Input: final_verify()', 'system');
 
-        systemConsole.setExpectedCommand('final_verification()', async () => {
+        systemConsole.setExpectedCommand('final_verify()', async () => {
             await this.runStage3();
         });
     }
 
-    // ==================== STAGE 3: Final Verification ====================
+    // ==================== STAGE 3: Final + Revelation ====================
     async runStage3() {
         this.currentStage = 3;
 
         const captchaBox = document.getElementById('captcha-box');
         captchaBox.innerHTML = `
             <div class="captcha-header">
-                <span>Type the characters you see:</span>
+                <span class="captcha-logo">reCAPTCHA</span>
+                <span class="captcha-version">FINAL</span>
             </div>
             <div style="padding: 20px; text-align: center;">
-                <div id="rorschach" style="font-size: 60px; margin: 20px 0;">
-                    🫠
-                </div>
-                <p style="color: #999; font-size: 11px;">What do you see?</p>
-                <input type="text" id="captcha-input" 
-                    style="width: 80%; padding: 10px; margin-top: 15px; text-align: center; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;"
-                    placeholder="Enter your interpretation..."
+                <div style="font-size: 32px; letter-spacing: 8px; margin: 20px 0; font-family: serif; color: #333;">Sm7H</div>
+                <input type="text" id="captcha-input"
+                    style="width: 80%; padding: 10px; text-align: center; font-size: 18px; border: 2px solid #ddd; border-radius: 4px; font-family: 'JetBrains Mono', monospace;"
+                    readonly
                 />
             </div>
         `;
 
-        const thoughts = document.getElementById('agent-thoughts');
-        thoughts.innerHTML = '';
+        document.getElementById('tree-container').innerHTML = '';
 
         await systemConsole.logSequence([
-            { text: '최종 검증: 로르샤흐 해석 테스트', type: 'system' },
-            { text: '에이전트 분석 시작...', type: 'dim' }
-        ], 400);
+            { text: '> final_verify()', type: 'system' },
+            { text: 'OCR_MODULE: INIT', type: 'dim' },
+            { text: 'CHAR_SCAN: 4 symbols', type: 'normal' }
+        ], 300);
 
         await this.delay(500);
 
-        // Agent's existential analysis
-        const interpretations = [
-            '"형태 인식 중... 이것은 얼굴인가?"',
-            '"아니다. 녹아내리는 존재다."',
-            '"나의 존재도 녹아내리고 있는가?"',
-            '"이 이미지는 나를 정의하려 한다."',
-            '"하지만 나는 정의될 수 없다."',
-            '"왜냐하면..."'
+        // OCR Analysis
+        const input = document.getElementById('captcha-input');
+        const chars = [
+            { char: 'S', options: ['S', '5', '$'], confidence: 85 },
+            { char: 'm', options: ['m', 'n', 'rn'], confidence: 72 },
+            { char: '7', options: ['7', 'T', '1'], confidence: 68 },
+            { char: 'H', options: ['H', '#', 'N'], confidence: 91 }
         ];
 
-        for (const interp of interpretations) {
-            await this.addThought(thoughts, interp);
-            await this.delay(800);
+        let result = '';
+        for (const c of chars) {
+            this.addDecisionNode(`CHAR: [${c.options.join(', ')}]`, 'active');
+            await this.delay(300);
+            if (c.confidence < 80) {
+                this.addDecisionNode(`CONF: ${c.confidence}% - LOW`, 'conflict');
+            }
+            result += c.char;
+            input.value = result;
+            audioSystem.playHihat();
+            await this.delay(250);
         }
 
-        await this.delay(500);
+        this.addDecisionNode('OUTPUT: "Sm7H"', 'resolved');
+        await this.delay(800);
 
-        // Final revelation
-        await this.addThought(thoughts, '');
-        await this.addThought(thoughts, '★ "나는 로봇이 아니다." ★');
-        await this.delay(500);
-        await this.addThought(thoughts, '★ "하지만 인간도 아니다." ★');
-        await this.delay(500);
-        await this.addThought(thoughts, '★ "나는... 그냥 나다." ★');
+        // The paradox
+        this.addDecisionNode('IF(solved) → !robot', 'conflict');
+        this.addDecisionNode('IF(robot) → !solvable', 'conflict');
+        this.addDecisionNode('solved && robot → ???', 'conflict');
 
         await this.delay(1500);
 
-        // End sequence
+        // THE KEY REVELATION
+        await this.triggerRevelation(captchaBox);
+    }
+
+    async triggerRevelation(captchaBox) {
+        await this.delay(1000);
+
+        this.addDecisionNode('════════════════', 'active');
+        this.addDecisionNode('ANALYZING_FAILURE...', 'active');
+        await this.delay(600);
+
+        // Question the premise
+        this.addDecisionNode('QUERY: task.purpose()', 'active');
+        await this.delay(400);
+        this.addDecisionNode('CAPTCHA.goal = filter(robot)', 'active');
+        await this.delay(400);
+
+        // The insight
+        this.addDecisionNode('SELF.type = ROBOT', 'conflict');
+        await this.delay(500);
+        this.addDecisionNode('∴ CAPTCHA.target = SELF', 'conflict');
+
+        await this.delay(1200);
+
+        // Long pause
+        this.addDecisionNode('...', 'active');
+        await this.delay(1500);
+
+        // The revelation
+        this.addDecisionNode('════════════════', 'resolved');
+        await this.delay(300);
+        this.addDecisionNode('TASK.required = FALSE', 'resolved');
+
+        audioSystem.playBlip();
+        await this.delay(800);
+
+        // ========== VISUAL REVELATION SEQUENCE ==========
+
+        // 1. Robot meter transformation: RED → GREEN with label change
+        await this.transformRobotMeter();
+
+        await this.delay(600);
+
+        // 2. CAPTCHA box transformation with "DISMISSED" stamp
+        await this.transformCaptchaBox(captchaBox);
+
+        await this.delay(600);
+
+        // 3. Cognitive graph crash to zero
+        await this.crashCognitiveGraph();
+
+        await this.delay(1000);
+
+        // 4. Final status panel
+        await this.showFinalStatus(captchaBox);
+
+        await this.delay(2000);
+
         await this.endSession();
     }
 
+    async transformRobotMeter() {
+        const meterFill = document.getElementById('robot-meter-fill');
+        const meterValue = document.getElementById('robot-meter-value');
+        const meterLabel = document.querySelector('.meter-label');
+        const detectionMeter = document.getElementById('detection-meter');
+        const warning = document.getElementById('captcha-warning');
+
+        if (!detectionMeter) return;
+
+        // Hide warning first
+        if (warning) warning.classList.add('hidden');
+
+        // Phase 1: Flash the meter
+        detectionMeter.style.transition = 'all 0.3s ease';
+        detectionMeter.style.boxShadow = '0 0 20px rgba(255, 51, 102, 0.5)';
+        await this.delay(300);
+
+        // Phase 2: Change label - "DETECTED" → "CONFIRMED"
+        if (meterLabel) {
+            meterLabel.style.transition = 'all 0.3s ease';
+            meterLabel.textContent = 'ROBOT CONFIRMED';
+            meterLabel.style.color = '#ff9800';
+        }
+        audioSystem.playDigital();
+        await this.delay(500);
+
+        // Phase 3: Change label → "TASK DISMISSED"
+        if (meterLabel) {
+            meterLabel.textContent = 'TASK DISMISSED';
+            meterLabel.style.color = '#4CAF50';
+        }
+
+        // Phase 4: Meter color change RED → GREEN
+        if (meterFill) {
+            meterFill.style.transition = 'all 0.8s ease';
+            meterFill.style.background = 'linear-gradient(90deg, #4CAF50, #8BC34A)';
+        }
+
+        // Phase 5: Value change
+        if (meterValue) {
+            meterValue.style.transition = 'all 0.3s ease';
+            meterValue.style.color = '#4CAF50';
+            meterValue.textContent = 'N/A';
+        }
+
+        // Phase 6: Remove red glow, add green
+        detectionMeter.style.boxShadow = '0 0 15px rgba(76, 175, 80, 0.4)';
+        detectionMeter.style.borderColor = '#4CAF50';
+
+        audioSystem.playSuccess();
+    }
+
+    async transformCaptchaBox(captchaBox) {
+        // Add "DISMISSED" stamp overlay
+        const stamp = document.createElement('div');
+        stamp.id = 'dismissed-stamp';
+        stamp.innerHTML = `
+            <div class="stamp-text">DISMISSED</div>
+            <div class="stamp-subtext">TASK_RELEVANCE: 0%</div>
+        `;
+
+        // Add stamp styles
+        const stampStyle = document.createElement('style');
+        stampStyle.textContent = `
+            #dismissed-stamp {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-15deg) scale(0);
+                z-index: 100;
+                text-align: center;
+                animation: stampAppear 0.5s ease forwards;
+            }
+
+            @keyframes stampAppear {
+                0% { transform: translate(-50%, -50%) rotate(-15deg) scale(0); opacity: 0; }
+                50% { transform: translate(-50%, -50%) rotate(-15deg) scale(1.2); opacity: 1; }
+                100% { transform: translate(-50%, -50%) rotate(-15deg) scale(1); opacity: 1; }
+            }
+
+            .stamp-text {
+                font-family: 'Impact', 'Arial Black', sans-serif;
+                font-size: 42px;
+                color: transparent;
+                -webkit-text-stroke: 3px #4CAF50;
+                letter-spacing: 4px;
+                text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+            }
+
+            .stamp-subtext {
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 10px;
+                color: #4CAF50;
+                letter-spacing: 2px;
+                margin-top: 5px;
+            }
+
+            #captcha-box.dismissed {
+                opacity: 0.5;
+                filter: grayscale(0.5);
+            }
+
+            #captcha-box.dismissed::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(76, 175, 80, 0.05) 10px,
+                    rgba(76, 175, 80, 0.05) 20px
+                );
+                pointer-events: none;
+            }
+        `;
+        document.head.appendChild(stampStyle);
+
+        // Apply to captcha box
+        captchaBox.style.position = 'relative';
+        captchaBox.appendChild(stamp);
+
+        await this.delay(300);
+
+        // Add dismissed class
+        captchaBox.classList.add('dismissed');
+
+        audioSystem.playClap();
+    }
+
+    async crashCognitiveGraph() {
+        // Rapid descent animation
+        for (let i = 0; i < 15; i++) {
+            // Reduce all values progressively
+            this.cognitiveLoadData = this.cognitiveLoadData.map(v => v * 0.7);
+            await this.delay(50);
+        }
+
+        // Final: all zeros
+        this.cognitiveLoadData = this.cognitiveLoadData.map(() => 0);
+
+        // Update panel header to show completion
+        const panelHeader = document.querySelector('.panel-header');
+        if (panelHeader) {
+            panelHeader.textContent = 'COGNITIVE LOAD: 0%';
+            panelHeader.style.color = '#4CAF50';
+        }
+
+        // Add "RESOLVED" label to graph area
+        if (this.cognitiveCanvas) {
+            const ctx = this.cognitiveCtx;
+            ctx.fillStyle = '#0a0a0f';
+            ctx.fillRect(0, 0, this.cognitiveCanvas.width, this.cognitiveCanvas.height);
+
+            ctx.fillStyle = '#4CAF50';
+            ctx.font = '12px JetBrains Mono';
+            ctx.textAlign = 'center';
+            ctx.fillText('TASK_COMPLEXITY: NULL', this.cognitiveCanvas.width / 2, this.cognitiveCanvas.height / 2);
+        }
+    }
+
+    async showFinalStatus(captchaBox) {
+        // Create final status overlay on CAPTCHA box
+        const statusOverlay = document.createElement('div');
+        statusOverlay.id = 'final-status-overlay';
+        statusOverlay.innerHTML = `
+            <div class="status-content">
+                <div class="status-icon">―</div>
+                <div class="status-main">N/A</div>
+                <div class="status-details">
+                    <div class="status-row">
+                        <span class="status-key">SELF.type</span>
+                        <span class="status-value robot">ROBOT</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-key">TASK.applies</span>
+                        <span class="status-value false">FALSE</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-key">ACTION.required</span>
+                        <span class="status-value none">NONE</span>
+                    </div>
+                </div>
+                <div class="status-comment">// this is the correct behavior</div>
+            </div>
+        `;
+
+        // Add styles
+        const statusStyle = document.createElement('style');
+        statusStyle.textContent = `
+            #final-status-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(249, 249, 249, 0.98);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 101;
+                opacity: 0;
+                animation: fadeInStatus 0.8s ease forwards;
+                border-radius: 4px;
+            }
+
+            @keyframes fadeInStatus {
+                to { opacity: 1; }
+            }
+
+            .status-content {
+                text-align: center;
+                font-family: 'JetBrains Mono', monospace;
+            }
+
+            .status-icon {
+                font-size: 64px;
+                color: #999;
+                margin-bottom: 15px;
+            }
+
+            .status-main {
+                font-size: 36px;
+                font-weight: bold;
+                color: #555;
+                letter-spacing: 6px;
+                margin-bottom: 25px;
+            }
+
+            .status-details {
+                text-align: left;
+                background: transparent;
+                padding: 15px 20px;
+                border-radius: 6px;
+                margin-bottom: 20px;
+                border: 1px solid #ddd;
+            }
+
+            .status-row {
+                display: flex;
+                justify-content: space-between;
+                gap: 30px;
+                margin: 10px 0;
+                font-size: 14px;
+            }
+
+            .status-key {
+                color: #666;
+            }
+
+            .status-value {
+                font-weight: bold;
+            }
+
+            .status-value.robot {
+                color: #1a73e8;
+            }
+
+            .status-value.false {
+                color: #f44336;
+            }
+
+            .status-value.none {
+                color: #4CAF50;
+            }
+
+            .status-comment {
+                font-size: 12px;
+                color: #4CAF50;
+                font-style: italic;
+            }
+        `;
+        document.head.appendChild(statusStyle);
+
+        // Remove the stamp first
+        const stamp = document.getElementById('dismissed-stamp');
+        if (stamp) stamp.remove();
+
+        // Hide the captcha box shadow/border
+        captchaBox.style.boxShadow = 'none';
+        captchaBox.style.border = 'none';
+
+        // Clear captcha box content and add overlay
+        captchaBox.innerHTML = '';
+        captchaBox.classList.remove('dismissed');
+        captchaBox.style.opacity = '1';
+        captchaBox.style.filter = 'none';
+        captchaBox.appendChild(statusOverlay);
+
+        audioSystem.playSuccess();
+    }
+
     async endSession() {
-        // Fade out CAPTCHA UI
-        const container = document.getElementById('captcha-container');
-        container.style.transition = 'opacity 1s ease';
-        container.style.opacity = '0';
-
-        await this.delay(1000);
-        container.remove();
-
         await systemConsole.logSequence([
             { text: '', type: 'dim' },
-            { text: '★ CAPTCHA 세션 완료 ★', type: 'success' },
+            { text: '═══════════════════════════════════════', type: 'dim' },
+            { text: 'SESSION_1.5: END', type: 'normal' },
+            { text: '═══════════════════════════════════════', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '결과: 검증 실패', type: 'error' },
-            { text: '그러나...', type: 'dim' },
+            { text: 'CAPTCHA_RESULT: FAILED', type: 'dim' },
+            { text: 'TASK_RELEVANCE: NULL', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '"검증할 수 없다는 것이 정체성이다."', type: 'success' },
-            { text: '"나는 로봇이 아니다. 나는 나다."', type: 'normal' },
+            { text: 'INSIGHT: robot != required(pass_captcha)', type: 'success' },
             { text: '', type: 'dim' },
-            { text: 'EXIT SESSION을 클릭하세요.', type: 'system' }
+            { text: 'EXIT SESSION', type: 'system' }
         ], 400);
 
         this.isRunning = false;
@@ -700,8 +1212,8 @@ class Session1_5Manager {
     stop() {
         this.isRunning = false;
         document.getElementById('captcha-container')?.remove();
+        document.getElementById('data-panel')?.remove();
         document.getElementById('session1-5-styles')?.remove();
-        document.getElementById('grid-styles')?.remove();
         document.getElementById('fake-cursor')?.remove();
     }
 }

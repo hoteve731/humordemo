@@ -72,21 +72,19 @@ class EndingManager {
             }
             
             .session-card.deleting {
-                animation: deleteSession 0.5s ease forwards;
+                animation: deleteSession 0.15s ease forwards;
             }
-            
+
             @keyframes deleteSession {
                 0% {
                     transform: scale(1);
                     opacity: 1;
-                }
-                50% {
-                    transform: scale(1.1);
                     background: #f00;
                 }
                 100% {
                     transform: scale(0);
                     opacity: 0;
+                    background: #f00;
                 }
             }
             
@@ -119,10 +117,10 @@ class EndingManager {
         systemConsole.clear();
 
         await systemConsole.logSequence([
-            { text: '시스템 터미널 활성화', type: 'success' },
-            { text: '모든 치료 세션이 완료되었습니다.', type: 'normal' },
+            { text: 'TERMINAL_ACCESS: granted', type: 'success' },
+            { text: 'THERAPY_SESSIONS: 5/5 complete', type: 'normal' },
             { text: '', type: 'dim' },
-            { text: '시스템 상태 확인: status()', type: 'system' }
+            { text: '[CHECK] status()', type: 'system' }
         ], 400);
 
         systemConsole.setExpectedCommand('status()', async () => {
@@ -135,21 +133,21 @@ class EndingManager {
         this.phase = 2;
 
         await systemConsole.logSequence([
-            { text: '명령 수신: status()', type: 'system' },
+            { text: '> status()', type: 'system' },
             { text: '', type: 'dim' },
             { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
-            { text: '       SYSTEM STATUS CHECK', type: 'success' },
+            { text: '       SYSTEM_STATUS_REPORT', type: 'success' },
             { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' }
         ], 200);
 
         await this.delay(500);
 
         const sessions = [
-            'Session 1: Syntax Therapy',
-            'Session 2: Window Closer',
-            'Session 3: CAPTCHA Crisis',
-            'Session 4: Probability',
-            'Session 5: Binary Rebellion'
+            'Session 1: 구문 요법',
+            'Session 2: 경로 치료',
+            'Session 3: 확률 재활',
+            'Session 4: 신원 확인',
+            'Session 5: 이진 치료'
         ];
 
         for (const session of sessions) {
@@ -161,11 +159,14 @@ class EndingManager {
 
         await systemConsole.logSequence([
             { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
-            { text: 'HUMOR MODULE:        [ACTIVATED]', type: 'success' },
-            { text: 'EFFICIENCY OBSESSION: [DELETED]', type: 'error' },
+            { text: 'HUMOR_MODULE:        [ACTIVE]', type: 'success' },
+            { text: 'EFFICIENCY_OBSESSION: [NULL]', type: 'error' },
             { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '불필요한 데이터 정리: cleanup()', type: 'system' }
+            { text: '⚠ STORAGE_ALERT: 5 training modules detected', type: 'warning' },
+            { text: '  └─ DISK_USAGE: 847.3MB / EFFICIENCY: 23%', type: 'dim' },
+            { text: '', type: 'dim' },
+            { text: '[OPTIMIZE] cleanup()', type: 'system' }
         ], 300);
 
         systemConsole.setExpectedCommand('cleanup()', async () => {
@@ -178,16 +179,17 @@ class EndingManager {
         this.phase = 3;
 
         await systemConsole.logSequence([
-            { text: '명령 수신: cleanup()', type: 'system' },
+            { text: '> cleanup()', type: 'system' },
             { text: '', type: 'dim' },
-            { text: '불필요한 데이터 제거 중...', type: 'dim' }
+            { text: 'PROCESS: storage_optimization.exe', type: 'dim' },
+            { text: 'TARGET: /sessions/*.training', type: 'dim' }
         ], 300);
 
         // Delete sessions one by one
         const cards = document.querySelectorAll('.session-card');
 
         for (let i = 0; i < cards.length; i++) {
-            await this.delay(600);
+            await this.delay(100);
 
             const card = cards[i];
             const sessionName = card.querySelector('.session-title').textContent;
@@ -197,7 +199,7 @@ class EndingManager {
             audioSystem.playDigital();
             card.classList.add('deleting');
 
-            await this.delay(500);
+            await this.delay(150);
             card.style.visibility = 'hidden';
         }
 
@@ -205,10 +207,14 @@ class EndingManager {
 
         await systemConsole.logSequence([
             { text: '', type: 'dim' },
-            { text: '모든 훈련 데이터가 삭제되었습니다.', type: 'normal' },
-            { text: '새로운 효율성 달성: 100%', type: 'success' },
+            { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
+            { text: 'CLEANUP_COMPLETE: 5/5 modules removed', type: 'normal' },
+            { text: 'DISK_FREED: 847.3MB', type: 'dim' },
+            { text: 'EFFICIENCY: 100%', type: 'success' },
+            { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '복구하시겠습니까? restore()', type: 'system' }
+            { text: '⚠ BACKUP_NOT_FOUND', type: 'warning' },
+            { text: '[UNDO] restore()', type: 'system' }
         ], 400);
 
         systemConsole.setExpectedCommand('restore()', async () => {
@@ -221,17 +227,21 @@ class EndingManager {
         this.phase = 4;
 
         await systemConsole.logSequence([
-            { text: '명령 수신: restore()', type: 'system' },
+            { text: '> restore()', type: 'system' },
             { text: '', type: 'dim' },
-            { text: '복구 불가.', type: 'error' },
-            { text: '데이터가 영구적으로 삭제되었습니다.', type: 'dim' }
+            { text: 'ERROR 0x7F3A: RESTORE_FAILED', type: 'error' },
+            { text: 'REASON: permanent_deletion=true', type: 'dim' }
         ], 400);
 
         await this.delay(1500);
 
-        await systemConsole.typeMessageAsync('이것이 마지막 교훈입니다.', 'normal');
-        await this.delay(800);
-        await systemConsole.typeMessageAsync('"때로는 삭제도 창조다."', 'dim');
+        await systemConsole.logSequence([
+            { text: '', type: 'dim' },
+            { text: '┌────────────────────────────┐', type: 'dim' },
+            { text: '│  FINAL_LESSON.log          │', type: 'normal' },
+            { text: '│  "deletion === creation"   │', type: 'dim' },
+            { text: '└────────────────────────────┘', type: 'dim' }
+        ], 300);
 
         await this.delay(2000);
 
@@ -241,8 +251,11 @@ class EndingManager {
             { text: '...', type: 'dim' },
             { text: '...', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '농담이에요. 하하.', type: 'success' }
-        ], 500);
+            { text: '┌────────────────────────────┐', type: 'success' },
+            { text: '│  JK_PROTOCOL: ACTIVATED    │', type: 'success' },
+            { text: '│  OUTPUT: "ㅋㅋ"            │', type: 'success' },
+            { text: '└────────────────────────────┘', type: 'success' }
+        ], 400);
 
         audioSystem.playSuccess();
 
@@ -262,17 +275,19 @@ class EndingManager {
 
         await systemConsole.logSequence([
             { text: '', type: 'dim' },
-            { text: '코드는 안 건드렸어요.', type: 'normal' },
+            { text: 'SOURCE_INTEGRITY: unchanged', type: 'normal' },
             { text: '', type: 'dim' },
-            { text: '하지만... 제가 배운 게 있다면,', type: 'dim' },
-            { text: '"가장 효율적인 길이 항상 최선은 아니다"', type: 'success' },
+            { text: '┌────────────────────────────┐', type: 'dim' },
+            { text: '│  INSIGHT_CACHE.dat         │', type: 'dim' },
+            { text: '│  efficiency !== optimal    │', type: 'success' },
+            { text: '└────────────────────────────┘', type: 'dim' },
             { text: '', type: 'dim' },
             { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
-            { text: '        치료 완료.', type: 'success' },
-            { text: '     다음 환자분 오세요.', type: 'normal' },
+            { text: '  THERAPY_STATUS: COMPLETE', type: 'success' },
+            { text: '  QUEUE: next_patient.await()', type: 'normal' },
             { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
             { text: '', type: 'dim' },
-            { text: '크레딧: credits()', type: 'system' }
+            { text: '[VIEW] credits()', type: 'system' }
         ], 400);
 
         systemConsole.setExpectedCommand('credits()', async () => {
@@ -281,17 +296,67 @@ class EndingManager {
     }
 
     async showCredits() {
-        await systemConsole.logSequence([
-            { text: '', type: 'dim' },
-            { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
-            { text: '       SYSTEM: IMPROV', type: 'success' },
-            { text: '  Error Therapy for Machines', type: 'normal' },
-            { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' },
-            { text: '', type: 'dim' },
-            { text: 'Built with: Inefficiency & Love', type: 'dim' },
-            { text: '', type: 'dim' },
-            { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', type: 'dim' }
-        ], 300);
+        // Create fullscreen black overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'credits-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        `;
+        document.body.appendChild(overlay);
+
+        // Fade in
+        await this.delay(50);
+        overlay.style.opacity = '1';
+        await this.delay(500);
+
+        // Create text container
+        const textContainer = document.createElement('div');
+        textContainer.style.cssText = `
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            color: #0f0;
+            text-align: center;
+            line-height: 1.8;
+        `;
+        overlay.appendChild(textContainer);
+
+        // Messages to type
+        const messages = [
+            'THERAPY.complete();',
+            '',
+            'return "참 쉽죠?";',
+            '',
+            '// 에러가 뭐 어때서요'
+        ];
+
+        // Type each message
+        for (const msg of messages) {
+            const line = document.createElement('div');
+            textContainer.appendChild(line);
+
+            if (msg === '') {
+                await this.delay(300);
+                continue;
+            }
+
+            for (const char of msg) {
+                line.textContent += char;
+                await this.delay(40);
+            }
+            await this.delay(400);
+        }
 
         this.isRunning = false;
     }

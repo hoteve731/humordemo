@@ -246,3 +246,75 @@ class FakeCursor {
 
 // Global cursor instance
 const fakeCursor = new FakeCursor();
+
+// Custom HTML Cursor System
+class CustomCursor {
+    constructor() {
+        this.cursor = document.getElementById('custom-cursor');
+        this.position = document.getElementById('cursor-position');
+        this.x = 0;
+        this.y = 0;
+        this.targetX = 0;
+        this.targetY = 0;
+
+        if (this.cursor && this.position) {
+            this.init();
+        }
+    }
+
+    init() {
+        // Mouse move
+        document.addEventListener('mousemove', (e) => {
+            this.targetX = e.clientX;
+            this.targetY = e.clientY;
+        });
+
+        // Mouse down/up for click effect
+        document.addEventListener('mousedown', () => {
+            this.cursor.classList.add('clicking');
+        });
+
+        document.addEventListener('mouseup', () => {
+            this.cursor.classList.remove('clicking');
+        });
+
+        // Hover effect on interactive elements
+        document.addEventListener('mouseover', (e) => {
+            const target = e.target;
+            if (target.matches('button, a, input, .session-card, .quick-msg-btn, #chat-expand-btn, #chat-collapse-btn')) {
+                this.cursor.classList.add('hovering');
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            const target = e.target;
+            if (target.matches('button, a, input, .session-card, .quick-msg-btn, #chat-expand-btn, #chat-collapse-btn')) {
+                this.cursor.classList.remove('hovering');
+            }
+        });
+
+        // Animation loop
+        this.animate();
+    }
+
+    animate() {
+        // Smooth follow with easing
+        const ease = 0.15;
+        this.x += (this.targetX - this.x) * ease;
+        this.y += (this.targetY - this.y) * ease;
+
+        // Update cursor position
+        this.cursor.style.left = this.x + 'px';
+        this.cursor.style.top = this.y + 'px';
+
+        // Update position display
+        this.position.textContent = `X: ${Math.round(this.targetX)} | Y: ${Math.round(this.targetY)}`;
+
+        requestAnimationFrame(() => this.animate());
+    }
+}
+
+// Initialize custom cursor when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.customCursor = new CustomCursor();
+});

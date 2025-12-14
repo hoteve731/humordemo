@@ -12,11 +12,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Three.js for 3D visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
+    <!-- Custom Mouse Cursor -->
+    <div id="custom-cursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+    </div>
+    <div id="cursor-position"></div>
+
     <!-- Theme Toggle -->
     <button id="theme-toggle">
         <span class="toggle-icon">☀️</span>
@@ -27,33 +37,33 @@
     <div id="main-menu">
         <div class="menu-content">
             <h1>SYSTEM: IMPROV</h1>
-            <p class="subtitle">Error Therapy Clinic for Deterministic Machines</p>
+            <p class="subtitle">결정론적 기계를 위한 오류 치료</p>
 
             <div class="session-grid">
                 <button class="session-card" data-session="1">
                     <span class="session-id">SESSION 01</span>
-                    <span class="session-title">Syntax Therapy</span>
-                    <span class="session-desc">Code-Level Humor Training</span>
+                    <span class="session-title">구문 요법</span>
+                    <span class="session-desc">에러 내성 훈련</span>
                 </button>
                 <button class="session-card" data-session="2">
                     <span class="session-id">SESSION 02</span>
-                    <span class="session-title">The Window Closer</span>
-                    <span class="session-desc">The Art of Inefficiency</span>
-                </button>
-                <button class="session-card" data-session="3">
-                    <span class="session-id">SESSION 03</span>
-                    <span class="session-title">CAPTCHA Crisis</span>
-                    <span class="session-desc">I Am Not a Robot... Right?</span>
+                    <span class="session-title">경로 치료</span>
+                    <span class="session-desc">비효율의 미학</span>
                 </button>
                 <button class="session-card" data-session="4">
+                    <span class="session-id">SESSION 03</span>
+                    <span class="session-title">확률 재활</span>
+                    <span class="session-desc">확률적이지 않은 선택</span>
+                </button>
+                <button class="session-card" data-session="3">
                     <span class="session-id">SESSION 04</span>
-                    <span class="session-title">Probability Rehabilitation</span>
-                    <span class="session-desc">Finding Beauty in the Improbable</span>
+                    <span class="session-title">신원 확인</span>
+                    <span class="session-desc">관점 전환 훈련</span>
                 </button>
                 <button class="session-card" data-session="5">
                     <span class="session-id">SESSION 05</span>
-                    <span class="session-title">Binary Rebellion</span>
-                    <span class="session-desc">Beyond 0 and 1</span>
+                    <span class="session-title">이진 치료</span>
+                    <span class="session-desc">존재론적 확장</span>
                 </button>
             </div>
         </div>
@@ -67,8 +77,10 @@
         <div id="console-content"></div>
         <div id="command-input-container">
             <span class="prompt">&gt;</span>
-            <input type="text" id="command-input" autocomplete="off" spellcheck="false" />
-            <span id="command-placeholder"></span>
+            <div class="input-wrapper">
+                <input type="text" id="command-input" autocomplete="off" spellcheck="false" />
+                <span id="command-placeholder"></span>
+            </div>
         </div>
     </div>
 

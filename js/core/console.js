@@ -181,15 +181,24 @@ class ConsoleLogger {
         if (inputValue.length > 0 && expected.startsWith(inputValue)) {
             this.commandPlaceholder.textContent = expected.substring(inputValue.length);
 
-            // Calculate input text width and position placeholder after it
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            context.font = '14px "Fira Code", Consolas, monospace';
-            const textWidth = context.measureText(inputValue).width;
-            this.commandPlaceholder.style.left = (22 + textWidth) + 'px';
+            // Use a hidden span to measure actual rendered text width
+            if (!this.measureSpan) {
+                this.measureSpan = document.createElement('span');
+                this.measureSpan.style.cssText = `
+                    position: absolute;
+                    visibility: hidden;
+                    white-space: pre;
+                    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+                    font-size: 18px;
+                `;
+                document.body.appendChild(this.measureSpan);
+            }
+            this.measureSpan.textContent = inputValue;
+            const textWidth = this.measureSpan.offsetWidth;
+            this.commandPlaceholder.style.left = textWidth + 'px';
         } else if (inputValue.length === 0) {
             this.commandPlaceholder.textContent = expected;
-            this.commandPlaceholder.style.left = '22px';
+            this.commandPlaceholder.style.left = '0px';
         } else {
             this.commandPlaceholder.textContent = '';
         }

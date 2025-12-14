@@ -65,33 +65,8 @@ class SessionManager {
     }
 
     endSession() {
-        const session = this.sessions[this.currentSession];
-
-        // Stop the current session if it has a stop method
-        if (session && session.stop) {
-            session.stop();
-        }
-
-        this.currentSession = null;
-
-        // Cleanup
-        windowManager.clearAll();
-        if (typeof fakeCursor !== 'undefined') {
-            fakeCursor.clearTrail();
-        }
-        systemConsole.clear();
-
-        // Hide session elements, show menu
-        this.menuEl.classList.remove('hidden');
-        this.consoleEl.classList.add('hidden');
-        this.canvasEl.classList.add('hidden');
-        this.homeBtnEl.classList.add('hidden');
-
-        // Remove the p5 canvas if it exists
-        const canvas = document.querySelector('#canvas-container canvas');
-        if (canvas) {
-            canvas.remove();
-        }
+        // Reload page to fully reset terminal history and all state
+        location.reload();
     }
 }
 
