@@ -253,6 +253,16 @@ function registerCommands() {
         }
     }, '0으로 나누기 (위험!)');
 
+    terminal.registerCommand('run', async () => {
+        if (currentSession !== 'logic') {
+            terminal.log('실행할 코드가 없습니다.', 'error');
+            return;
+        }
+        if (typeof logicCrashSession !== 'undefined') {
+            await logicCrashSession.triggerCrash();
+        }
+    }, '코드 실행');
+
     // 유틸리티
     terminal.registerCommand('clear', () => {
         terminal.clear();

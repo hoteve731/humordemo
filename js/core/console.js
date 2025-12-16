@@ -33,6 +33,7 @@ class Terminal {
             'run_deadlock()',
             'run_divide_safe()',
             'run_divide_unsafe()',
+            'run()',
             'reset()'
         ];
         this.currentStep = 0;
@@ -180,35 +181,62 @@ class Terminal {
         }
     }
 
-    // 자동완성
-    autocomplete() {
-        const partial = this.input.value.trim();
+    // 자동완성 (한 글자씩 타이핑 효과)
+    async autocomplete() {
+        if (this.isAutoCompleting) return;  // 자동완성 중 중복 방지
 
-        // 자동완성 사운드
-        if (typeof audioSystem !== 'undefined' && audioSystem.initialized) {
-            audioSystem.playBlip();
-        }
+        const partial = this.input.value.trim();
+        let targetCommand = '';
 
         // 입력이 비어있으면 현재 플레이스홀더(다음 명령어) 자동완성
         if (!partial) {
-            const nextCommand = this.commandSequence[this.currentStep];
-            if (nextCommand) {
-                this.input.value = nextCommand;
-                this.updatePlaceholder();
+            targetCommand = this.commandSequence[this.currentStep] || '';
+        } else {
+            // 부분 입력에 매칭되는 명령어 찾기
+            const matches = Object.keys(this.commands).filter(cmd =>
+                cmd.startsWith(partial)
+            );
+
+            if (matches.length === 1) {
+                targetCommand = matches[0] + '()';
+            } else if (matches.length > 1) {
+                this.log(`Matches: ${matches.join(', ')}`, 'dim');
+                return;
+            } else {
+                return;
             }
-            return;
         }
 
-        const matches = Object.keys(this.commands).filter(cmd =>
-            cmd.startsWith(partial)
-        );
+        if (!targetCommand) return;
 
-        if (matches.length === 1) {
-            this.input.value = matches[0] + '()';
+        // 이미 입력된 부분 이후부터 타이핑
+        const startIndex = partial.length;
+        const remainingChars = targetCommand.slice(startIndex);
+
+        if (!remainingChars) return;
+
+        this.isAutoCompleting = true;
+
+        // 한 글자씩 0.8초 간격으로 타이핑
+        for (let i = 0; i < remainingChars.length; i++) {
+            this.input.value += remainingChars[i];
             this.updatePlaceholder();
-        } else if (matches.length > 1) {
-            this.log(`Matches: ${matches.join(', ')}`, 'dim');
+
+            // 타이핑 사운드
+            if (typeof audioSystem !== 'undefined') {
+                if (!audioSystem.initialized) {
+                    await audioSystem.init();
+                }
+                audioSystem.playKey();
+            }
+
+            // 마지막 글자가 아니면 랜덤 딜레이 (0.045~0.12초)
+            if (i < remainingChars.length - 1) {
+                await this.delay(45 + Math.random() * 75);
+            }
         }
+
+        this.isAutoCompleting = false;
     }
 
     // 유사 명령어 제안

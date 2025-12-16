@@ -12,11 +12,10 @@ const logicCrashSession = {
             { text: '무한 루프 코드 로딩...', type: 'dim' }
         ], 300);
 
-        codeEditor.setFilename('infinite_loop.js');
+        codeEditor.setFilename('infinite_loop.py');
 
-        const code = `while(true) {
-    print("ㅋ");
-}`;
+        const code = `while True:
+    print("ㅋ")`;
 
         await codeEditor.setCode(code);
 
@@ -113,15 +112,15 @@ const logicCrashSession = {
             { text: '데드락 시뮬레이션 로딩...', type: 'dim' }
         ], 300);
 
-        codeEditor.setFilename('deadlock.js');
+        codeEditor.setFilename('deadlock.py');
 
-        const code = `// Process A
-lock(resourceB);  // B를 기다림
-lock(resourceA);
+        const code = `# Process A
+lock(B)
+lock(A)
 
-// Process B
-lock(resourceA);  // A를 기다림
-lock(resourceB);`;
+# Process B
+lock(A)
+lock(B)`;
 
         await codeEditor.setCode(code);
 
@@ -179,22 +178,21 @@ lock(resourceB);`;
             { text: '안전한 나눗셈 코드 로딩...', type: 'dim' }
         ], 300);
 
-        codeEditor.setFilename('joke.js');
+        codeEditor.setFilename('joke.py');
 
-        const code = `try {
-    int joke = 1 / 0;
-} catch {
-    print("에러입니다");
-}`;
+        const code = `try:
+    joke = 1 / 0
+except:
+    print("에러입니다")`;
 
         await codeEditor.setCode(code);
 
-        // try-catch 흐름 다이어그램 표시
+        // try-except 흐름 다이어그램 표시
         codeEditor.showTryCatchDiagram();
 
         await terminal.typeSequence([
             { text: '코드 준비 완료.', type: 'success' },
-            { text: 'try-catch로 감싸져 있습니다.', type: 'dim' },
+            { text: 'try-except로 감싸져 있습니다.', type: 'dim' },
             { text: '웃음을 꾹 참는 거죠.', type: 'normal' }
         ], 400);
 
@@ -236,31 +234,30 @@ lock(resourceB);`;
             { text: '안전장치를 제거하겠습니다.', type: 'system' }
         ], 300);
 
-        codeEditor.setFilename('joke.js');
+        codeEditor.setFilename('joke.py');
         codeEditor.hideOutput();
 
-        const safecode = `try {
-    int joke = 1 / 0;
-} catch {
-    print("에러입니다");
-}`;
+        const safecode = `try:
+    joke = 1 / 0
+except:
+    print("에러입니다")`;
 
         await codeEditor.setCode(safecode);
 
-        // try-catch 다이어그램 (아직 안전한 상태)
+        // try-except 다이어그램 (아직 안전한 상태)
         codeEditor.showTryCatchDiagram();
 
         await terminal.delay(800);
 
         await terminal.typeSequence([
             { text: '억지로 참는 건 건강에 해롭습니다.', type: 'normal' },
-            { text: 'try-catch 구문 선택 중...', type: 'dim' }
+            { text: 'try-except 구문 선택 중...', type: 'dim' }
         ], 400);
 
-        // 라인 선택 애니메이션 (try-catch 부분)
-        codeEditor.selectLines(1, 1);  // try {
+        // 라인 선택 애니메이션 (try-except 부분)
+        codeEditor.selectLines(1, 1);  // try:
         await terminal.delay(300);
-        codeEditor.selectLines(3, 5);  // } catch { ... }
+        codeEditor.selectLines(3, 4);  // except: print(...)
 
         await terminal.delay(800);
 
@@ -269,7 +266,7 @@ lock(resourceB);`;
         await terminal.delay(500);
 
         // 삭제 애니메이션
-        await codeEditor.deleteLines(3, 5);  // catch 블록 삭제
+        await codeEditor.deleteLines(3, 4);  // except 블록 삭제
         await terminal.delay(300);
         await codeEditor.deleteLines(1, 1);  // try 삭제
 
@@ -277,7 +274,7 @@ lock(resourceB);`;
 
         // 남은 코드만 표시
         codeEditor.clear();
-        const unsafeCode = `int joke = 1 / 0;`;
+        const unsafeCode = `joke = 1 / 0`;
         await codeEditor.setCode(unsafeCode);
 
         // 크래시 다이어그램으로 전환 (안전장치 제거됨)
@@ -285,15 +282,14 @@ lock(resourceB);`;
 
         await terminal.typeSequence([
             { text: '안전장치 제거 완료.', type: 'success' },
-            { text: '그냥 터뜨려.', type: 'normal' }
+            { text: '그냥 터뜨려.', type: 'normal' },
+            { text: 'run() 명령어로 실행하세요.', type: 'dim' }
         ], 400);
+    },
 
-        await terminal.delay(1000);
-
-        terminal.log('Enter 키 입력...', 'system');
+    // ===== 블루스크린 트리거 =====
+    async triggerCrash() {
         audioSystem.playBlip();
-
-        await terminal.delay(500);
 
         // 실행 전 코드 강조 (깜빡임 효과)
         codeEditor.highlightExecuting(1);
