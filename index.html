@@ -4,17 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System: IMPROV</title>
-    <meta name="description" content="기계적 효율에서 예술적 비효율로의 변화를 시각화하는 인터랙티브 데모">
+    <title>DE-BUGGING</title>
+    <meta name="description" content="이건 고장 난 게 아닙니다. 아주 크게 웃고 있는 겁니다.">
 
     <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <!-- Three.js for 3D visualization -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -25,86 +21,117 @@
         <div class="cursor-dot"></div>
         <div class="cursor-ring"></div>
     </div>
-    <div id="cursor-position"></div>
 
-    <!-- Theme Toggle -->
-    <button id="theme-toggle">
-        <span class="toggle-icon">☀️</span>
-        <span class="toggle-text">LIGHT</span>
-    </button>
-
-    <!-- Main Menu (The Clinic) -->
-    <div id="main-menu">
-        <div class="menu-content">
-            <h1>SYSTEM: IMPROV</h1>
-            <p class="subtitle">결정론적 기계를 위한 오류 치료</p>
-
-            <div class="session-grid">
-                <button class="session-card" data-session="1">
-                    <span class="session-id">SESSION 01</span>
-                    <span class="session-title">구문 요법</span>
-                    <span class="session-desc">에러 내성 훈련</span>
-                </button>
-                <button class="session-card" data-session="2">
-                    <span class="session-id">SESSION 02</span>
-                    <span class="session-title">경로 치료</span>
-                    <span class="session-desc">비효율의 미학</span>
-                </button>
-                <button class="session-card" data-session="4">
-                    <span class="session-id">SESSION 03</span>
-                    <span class="session-title">확률 재활</span>
-                    <span class="session-desc">확률적이지 않은 선택</span>
-                </button>
-                <button class="session-card" data-session="3">
-                    <span class="session-id">SESSION 04</span>
-                    <span class="session-title">신원 확인</span>
-                    <span class="session-desc">관점 전환 훈련</span>
-                </button>
-                <button class="session-card" data-session="5">
-                    <span class="session-id">SESSION 05</span>
-                    <span class="session-title">이진 치료</span>
-                    <span class="session-desc">존재론적 확장</span>
-                </button>
+    <!-- Main Layout: Terminal (Left) + Visualization (Right) -->
+    <div id="main-container">
+        <!-- Terminal Panel (Left) -->
+        <div id="terminal-panel">
+            <div class="terminal-header">
+                <span class="terminal-title">DE-BUGGING TERMINAL</span>
+                <span class="terminal-status" id="terminal-status">READY</span>
             </div>
+            <div id="terminal-content"></div>
+            <div id="terminal-input-container">
+                <span class="prompt">&gt;</span>
+                <div class="input-wrapper">
+                    <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" />
+                    <span id="input-placeholder"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Panel (Right) -->
+        <div id="viz-panel">
+            <!-- SESSION 1: Popup Clicker -->
+            <div id="popup-container" class="viz-content hidden">
+            </div>
+
+            <!-- SESSION 2: Text Predictor -->
+            <div id="predictor-container" class="viz-content hidden">
+                <div id="predictor-prompt"></div>
+                <div id="predictor-list"></div>
+            </div>
+
+            <!-- SESSION 3: Code Editor -->
+            <div id="editor-container" class="viz-content hidden">
+                <div class="editor-header">
+                    <span class="editor-filename" id="editor-filename">joke.js</span>
+                    <div class="editor-controls">
+                        <button id="editor-run-btn">RUN</button>
+                    </div>
+                </div>
+                <div id="editor-content"></div>
+                <div id="editor-output" class="hidden"></div>
+                <!-- Execution Flow Diagram -->
+                <div id="editor-diagram" class="hidden">
+                    <div class="diagram-title">EXECUTION FLOW</div>
+                    <div id="diagram-content"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Hidden ending button (outside main-menu) -->
-    <button id="hidden-ending" title="...">?</button>
-
-    <!-- Layer 1: Console Log (Bottom) - Hidden by default -->
-    <div id="console-log" class="hidden">
-        <div id="console-content"></div>
-        <div id="command-input-container">
-            <span class="prompt">&gt;</span>
-            <div class="input-wrapper">
-                <input type="text" id="command-input" autocomplete="off" spellcheck="false" />
-                <span id="command-placeholder"></span>
+    <!-- ENDING: Mac Internet Recovery Screen (body 직속으로 이동 - position:fixed 최상위) -->
+    <div id="mac-recovery-container" class="hidden">
+        <!-- White flicker overlay -->
+        <div class="mac-flicker-overlay"></div>
+        <div class="mac-recovery-content">
+            <!-- Spinning Globe -->
+            <div class="mac-globe">
+                <svg viewBox="0 0 100 100" class="globe-svg">
+                    <!-- Globe outline -->
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="2"/>
+                    <!-- Horizontal lines (latitude) -->
+                    <ellipse cx="50" cy="50" rx="45" ry="15" fill="none" stroke="white" stroke-width="1.5"/>
+                    <ellipse cx="50" cy="50" rx="45" ry="35" fill="none" stroke="white" stroke-width="1.5"/>
+                    <!-- Vertical line (prime meridian) -->
+                    <ellipse cx="50" cy="50" rx="20" ry="45" fill="none" stroke="white" stroke-width="1.5"/>
+                    <!-- Continents (simplified) -->
+                    <path d="M30 25 Q35 20 45 22 Q50 25 48 35 Q45 40 35 38 Q28 35 30 25" fill="white" opacity="0.9"/>
+                    <path d="M55 30 Q70 28 75 40 Q78 55 70 65 Q60 70 55 60 Q50 50 55 30" fill="white" opacity="0.9"/>
+                    <path d="M25 50 Q30 45 40 48 Q45 55 40 65 Q30 70 22 60 Q20 55 25 50" fill="white" opacity="0.9"/>
+                    <path d="M60 75 Q70 72 75 78 Q72 85 60 82 Q55 80 60 75" fill="white" opacity="0.9"/>
+                </svg>
+                <div class="globe-spinner"></div>
             </div>
+
+            <!-- Progress Bar -->
+            <div class="mac-progress-container">
+                <div class="mac-progress-bar">
+                    <div class="mac-progress-fill" id="mac-progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Timer -->
+            <div class="mac-timer">
+                <span class="timer-icon">⏱</span>
+                <span id="mac-timer-text">0:05</span>
+            </div>
+
+            <!-- Status Text -->
+            <div class="mac-status-text">
+                <div id="mac-status-line1">Starting Internet Recovery.</div>
+                <div id="mac-status-line2">This may take a while.</div>
+            </div>
+
+            <!-- Error Messages (hidden initially) -->
+            <div class="mac-error-text" id="mac-error-text"></div>
         </div>
     </div>
-
-    <!-- Layer 2: Canvas container -->
-    <div id="canvas-container" class="hidden"></div>
-
-    <!-- Back to Menu Button (Hidden by default) -->
-    <button id="home-btn" class="hidden">EXIT SESSION</button>
 
     <!-- Scripts -->
     <!-- Core Systems -->
     <script src="js/core/console.js"></script>
     <script src="js/core/audio.js"></script>
-    <script src="js/core/cursor.js"></script>
-    <script src="js/core/windows.js"></script>
-    <script src="js/core/obstacles.js"></script>
-    <script src="js/core/SessionManager.js"></script>
+    <script src="js/core/PopupClicker.js"></script>
+    <script src="js/core/TextPredictor.js"></script>
+    <script src="js/core/CodeEditor.js"></script>
 
     <!-- Sessions -->
-    <script src="js/sessions/session0.js"></script>
-    <script src="js/sessions/session1.js"></script>
-    <script src="js/sessions/session1_5.js"></script>
-    <script src="js/sessions/session2.js"></script>
-    <script src="js/sessions/session5.js"></script>
+    <script src="js/sessions/slapstick.js"></script>
+    <script src="js/sessions/wordplay.js"></script>
+    <script src="js/sessions/logic_crash.js"></script>
     <script src="js/sessions/ending.js"></script>
 
     <!-- Main Entry -->

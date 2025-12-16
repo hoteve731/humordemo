@@ -1,266 +1,292 @@
-// Main Entry Point - p5.js setup and draw loop
+// DE-BUGGING Main Entry Point
+// 공연용 인터랙티브 데모
 
-// ===== THEME MANAGEMENT =====
-const themeManager = {
-    currentTheme: 'dark',
+// ===== 전역 상태 =====
+let currentSession = null;
+
+// ===== 커서 시스템 =====
+class CustomCursor {
+    constructor() {
+        this.cursor = document.getElementById('custom-cursor');
+        this.x = 0;
+        this.y = 0;
+        this.targetX = 0;
+        this.targetY = 0;
+
+        if (this.cursor) {
+            this.init();
+        }
+    }
 
     init() {
-        // Load saved theme from localStorage
-        const savedTheme = localStorage.getItem('improv-theme') || 'dark';
-        this.setTheme(savedTheme);
+        document.addEventListener('mousemove', (e) => {
+            this.targetX = e.clientX;
+            this.targetY = e.clientY;
+        });
 
-        // Set up toggle button
-        const toggleBtn = document.getElementById('theme-toggle');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => this.toggle());
-        }
-    },
+        document.addEventListener('mousedown', () => {
+            this.cursor.classList.add('clicking');
+        });
 
-    setTheme(theme) {
-        this.currentTheme = theme;
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('improv-theme', theme);
-        this.updateToggleButton();
-    },
+        document.addEventListener('mouseup', () => {
+            this.cursor.classList.remove('clicking');
+        });
 
-    toggle() {
-        const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-        this.setTheme(newTheme);
-    },
-
-    updateToggleButton() {
-        const toggleBtn = document.getElementById('theme-toggle');
-        if (toggleBtn) {
-            const icon = toggleBtn.querySelector('.toggle-icon');
-            const text = toggleBtn.querySelector('.toggle-text');
-            if (this.currentTheme === 'dark') {
-                icon.textContent = '☀️';
-                text.textContent = 'LIGHT';
-            } else {
-                icon.textContent = '🌙';
-                text.textContent = 'DARK';
-            }
-        }
-    },
-
-    // Get colors for p5.js canvas based on current theme
-    getCanvasColors() {
-        if (this.currentTheme === 'light') {
-            return {
-                background: [245, 240, 230],  // Sepia background
-                grid: [200, 190, 170, 80],    // Light sepia grid
-                vignette: [232, 224, 208]     // Light vignette
-            };
-        } else {
-            return {
-                background: [10, 10, 15],     // Dark background
-                grid: [20, 20, 30],           // Dark grid
-                vignette: [0, 0, 0]           // Dark vignette
-            };
-        }
-    }
-};
-
-let stageCanvas;
-let p5Instance = null;
-
-// p5.js sketch definition
-const sketch = (p) => {
-    p.setup = function () {
-        stageCanvas = p.createCanvas(p.windowWidth, p.windowHeight);
-        stageCanvas.parent('canvas-container');
-        stageCanvas.style('z-index', '1');
-        p.textFont('Segoe UI, sans-serif');
-
-        // Initialize systems
-        if (typeof fakeCursor !== 'undefined') {
-            fakeCursor.setPosition(100, 100);
-        }
-    };
-
-    p.draw = function () {
-        // Clear background with theme-aware colors
-        const colors = themeManager.getCanvasColors();
-        p.background(...colors.background);
-
-        // Draw desktop grid pattern
-        drawDesktopGrid(p);
-
-        // Update physics if active
-        if (typeof obstacleManager !== 'undefined') {
-            obstacleManager.updatePhysics();
-            obstacleManager.updateMatrixRain();
-        }
-
-        // Update floating windows
-        if (typeof windowManager !== 'undefined') {
-            windowManager.updateFloating();
-
-            // Update window physics bodies positions
-            windowManager.windows.forEach(win => {
-                if (win.physicsBody) {
-                    win.x = win.physicsBody.position.x - win.width / 2;
-                    win.y = win.physicsBody.position.y - win.height / 2;
-                    win.rotation = win.physicsBody.angle;
-                    windowManager.updateCloseButtonPosition(win);
-                }
-            });
-        }
-
-        // Draw ghost path (behind everything)
-        if (typeof fakeCursor !== 'undefined' && fakeCursor.showGhost && fakeCursor.ghostStart && fakeCursor.ghostEnd) {
-            fakeCursor.drawGhostPath(p,
-                fakeCursor.ghostStart.x, fakeCursor.ghostStart.y,
-                fakeCursor.ghostEnd.x, fakeCursor.ghostEnd.y);
-        }
-
-        // Draw windows FIRST (behind maze)
-        if (typeof windowManager !== 'undefined') {
-            windowManager.draw(p);
-        }
-
-        // Draw maze IN FRONT of windows
-        if (typeof obstacleManager !== 'undefined') {
-            obstacleManager.drawMaze(p);
-        }
-
-        // Draw puzzle pieces if any (on top of maze)
-        if (typeof windowManager !== 'undefined') {
-            windowManager.windows.forEach(win => {
-                if (win.pieces) {
-                    windowManager.drawPuzzlePieces(p, win);
-                }
-            });
-
-            // Draw math overlay
-            if (typeof obstacleManager !== 'undefined') {
-                obstacleManager.drawMathOverlay(p);
-            }
-        }
-
-        // Draw trail
-        if (typeof fakeCursor !== 'undefined') {
-            fakeCursor.drawTrail(p);
-            fakeCursor.draw(p);
-        }
-    };
-
-    p.windowResized = function () {
-        p.resizeCanvas(p.windowWidth, p.windowHeight);
-    };
-};
-
-function drawDesktopGrid(p) {
-    const colors = themeManager.getCanvasColors();
-
-    p.push();
-    p.stroke(...colors.grid);
-    p.strokeWeight(1);
-
-    const gridSize = 50;
-
-    for (let x = 0; x < p.width; x += gridSize) {
-        p.line(x, 0, x, p.height);
-    }
-    for (let y = 0; y < p.height; y += gridSize) {
-        p.line(0, y, p.width, y);
+        this.animate();
     }
 
-    // Subtle vignette effect
-    p.noFill();
-    for (let i = 0; i < 5; i++) {
-        p.stroke(...colors.vignette, (5 - i) * 10);
-        p.strokeWeight(100 - i * 20);
-        p.rect(0, 0, p.width, p.height);
-    }
+    animate() {
+        const ease = 0.15;
+        this.x += (this.targetX - this.x) * ease;
+        this.y += (this.targetY - this.y) * ease;
 
-    p.pop();
+        this.cursor.style.left = this.x + 'px';
+        this.cursor.style.top = this.y + 'px';
+
+        requestAnimationFrame(() => this.animate());
+    }
 }
 
-// Initialize everything when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize theme manager
-    themeManager.init();
-
-    // Initialize session manager
-    sessionManager.init();
-
-    // Initialize console system
-    systemConsole.init();
-
-    // Register Session 1 (Syntax Therapy)
-    sessionManager.registerSession(1, {
-        start: function () {
-            session0Manager.start();
-        },
-        stop: function () {
-            session0Manager.stop();
-        }
-    });
-
-    // Register Session 2 (The Window Closer)
-    sessionManager.registerSession(2, {
-        start: function () {
-            // Create p5 instance if not exists
-            if (!p5Instance) {
-                p5Instance = new p5(sketch);
-            }
-            // Start the phase manager (from session1.js)
-            setTimeout(() => {
-                phaseManager.start();
-            }, 500);
-        },
-        stop: function () {
-            // Stop phase manager
-            phaseManager.isRunning = false;
-            phaseManager.currentPhase = 0;
-
-            // Remove p5 instance
-            if (p5Instance) {
-                p5Instance.remove();
-                p5Instance = null;
-            }
-        }
-    });
-
-    // Register Session 3 (CAPTCHA Crisis)
-    sessionManager.registerSession(3, {
-        start: function () {
-            session1_5Manager.start();
-        },
-        stop: function () {
-            session1_5Manager.stop();
-        }
-    });
-
-    // Register Session 4 (Probability Rehabilitation)
-    sessionManager.registerSession(4, {
-        start: function () {
-            session2Manager.start();
-        },
-        stop: function () {
-            session2Manager.stop();
-        }
-    });
-
-    // Register Session 5 (Binary Rebellion)
-    sessionManager.registerSession(5, {
-        start: function () {
-            session5Manager.start();
-        },
-        stop: function () {
-            session5Manager.stop();
-        }
-    });
-
-    // Hidden ending button listener
-    const hiddenEndingBtn = document.getElementById('hidden-ending');
-    if (hiddenEndingBtn) {
-        hiddenEndingBtn.addEventListener('click', () => {
-            endingManager.start();
+// ===== 시각화 패널 관리 =====
+const vizManager = {
+    hideAll() {
+        document.querySelectorAll('.viz-content').forEach(el => {
+            el.classList.add('hidden');
         });
+    },
+
+    show(containerId) {
+        this.hideAll();
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.classList.remove('hidden');
+        }
     }
+};
+
+// ===== 명령어 등록 =====
+function registerCommands() {
+    // 기본 명령어
+    terminal.registerCommand('help', () => {
+        terminal.showHelp();
+    }, '명령어 목록');
+
+    // SESSION 1: 슬랩스틱
+    terminal.registerCommand('start_session_1', async () => {
+        currentSession = 'slapstick';
+        await terminal.typeSequence([
+            { text: 'SESSION 1: 슬랩스틱 시작', type: 'success' },
+            { text: '비효율의 미학을 보여드리겠습니다.', type: 'dim' }
+        ]);
+        vizManager.show('popup-container');
+        if (typeof popupClicker !== 'undefined') {
+            popupClicker.init();
+        }
+    }, 'SESSION 1 시작');
+
+    // Baseline: 셋업 → 실행 분리
+    terminal.registerCommand('setup_baseline', async () => {
+        if (currentSession !== 'slapstick') {
+            terminal.log('먼저 start_session_1을 실행하세요.', 'error');
+            return;
+        }
+        if (typeof slapstickSession !== 'undefined') {
+            await slapstickSession.setupBaseline();
+        }
+    }, '최단거리 준비');
+
+    terminal.registerCommand('run_baseline', async () => {
+        if (currentSession !== 'slapstick') {
+            terminal.log('먼저 setup_baseline을 실행하세요.', 'error');
+            return;
+        }
+        if (typeof slapstickSession !== 'undefined') {
+            await slapstickSession.executeBaseline();
+        }
+    }, '최단거리 실행');
+
+    // Maze: 셋업 → 실행 분리
+    terminal.registerCommand('setup_maze', async () => {
+        if (currentSession !== 'slapstick') {
+            terminal.log('먼저 start_session_1을 실행하세요.', 'error');
+            return;
+        }
+        if (typeof slapstickSession !== 'undefined') {
+            await slapstickSession.setupMaze();
+        }
+    }, '미로 준비');
+
+    terminal.registerCommand('run_maze', async () => {
+        if (currentSession !== 'slapstick') {
+            terminal.log('먼저 setup_maze를 실행하세요.', 'error');
+            return;
+        }
+        if (typeof slapstickSession !== 'undefined') {
+            await slapstickSession.executeMaze();
+        }
+    }, '미로 탈출 실행');
+
+    terminal.registerCommand('run_overthink', async () => {
+        if (currentSession !== 'slapstick') {
+            terminal.log('먼저 start_session_1을 실행하세요.', 'error');
+            return;
+        }
+        if (typeof slapstickSession !== 'undefined') {
+            await slapstickSession.runOverthink();
+        }
+    }, '과부하 (The Thinking)');
+
+    // Zeno: 셋업 → 실행 분리
+    terminal.registerCommand('setup_zeno', async () => {
+        if (currentSession !== 'slapstick') {
+            terminal.log('먼저 start_session_1을 실행하세요.', 'error');
+            return;
+        }
+        if (typeof slapstickSession !== 'undefined') {
+            await slapstickSession.setupZeno();
+        }
+    }, '제논 모드 준비');
+
+    terminal.registerCommand('run_zeno', async () => {
+        if (currentSession !== 'slapstick') {
+            terminal.log('먼저 setup_zeno를 실행하세요.', 'error');
+            return;
+        }
+        if (typeof slapstickSession !== 'undefined') {
+            await slapstickSession.executeZeno();
+        }
+    }, '제논 모드 실행');
+
+    // SESSION 2: 언어유희
+    terminal.registerCommand('start_session_2', async () => {
+        // 제논 모드 중단
+        if (typeof slapstickSession !== 'undefined') {
+            slapstickSession.stopZeno();
+        }
+
+        currentSession = 'wordplay';
+        vizManager.hideAll();
+        await terminal.typeSequence([
+            { text: 'SESSION 2: 언어유희 시작', type: 'success' },
+            { text: '확률 0%의 오답을 찾아보겠습니다.', type: 'dim' }
+        ]);
+        vizManager.show('predictor-container');
+        if (typeof textPredictor !== 'undefined') {
+            textPredictor.init();
+        }
+    }, 'SESSION 2 시작');
+
+    terminal.registerCommand('predict', async (text) => {
+        if (currentSession !== 'wordplay') {
+            terminal.log('먼저 start_session_2()를 실행하세요.', 'error');
+            return;
+        }
+        if (typeof wordplaySession !== 'undefined') {
+            await wordplaySession.predict(text);
+        }
+    }, '텍스트 예측');
+
+    // SESSION 3: 논리 붕괴
+    terminal.registerCommand('start_session_3', async () => {
+        // 광합성 에러 로그 중단
+        if (typeof wordplaySession !== 'undefined') {
+            wordplaySession.stopPhotosynthesisError();
+        }
+
+        currentSession = 'logic';
+        vizManager.hideAll();
+        await terminal.typeSequence([
+            { text: 'SESSION 3: 논리 붕괴 시작', type: 'success' },
+            { text: '기계의 금기를 건드려보겠습니다.', type: 'dim' }
+        ]);
+        vizManager.show('editor-container');
+        if (typeof codeEditor !== 'undefined') {
+            codeEditor.init();
+        }
+    }, 'SESSION 3 시작');
+
+    terminal.registerCommand('run_infinite_loop', async () => {
+        if (currentSession !== 'logic') {
+            terminal.log('먼저 start_session_3()를 실행하세요.', 'error');
+            return;
+        }
+        if (typeof logicCrashSession !== 'undefined') {
+            await logicCrashSession.runInfiniteLoop();
+        }
+    }, '무한 루프');
+
+    terminal.registerCommand('kill', () => {
+        if (typeof logicCrashSession !== 'undefined' && logicCrashSession.loopRunning) {
+            logicCrashSession.stopLoop();
+        } else {
+            terminal.log('중단할 프로세스가 없습니다.', 'dim');
+        }
+    }, '무한루프 강제 중단');
+
+    terminal.registerCommand('run_deadlock', async () => {
+        if (currentSession !== 'logic') {
+            terminal.log('먼저 start_session_3()를 실행하세요.', 'error');
+            return;
+        }
+        if (typeof logicCrashSession !== 'undefined') {
+            await logicCrashSession.runDeadlock();
+        }
+    }, '데드락');
+
+    terminal.registerCommand('run_divide_safe', async () => {
+        if (currentSession !== 'logic') {
+            terminal.log('먼저 start_session_3()를 실행하세요.', 'error');
+            return;
+        }
+        if (typeof logicCrashSession !== 'undefined') {
+            await logicCrashSession.runDivideSafe();
+        }
+    }, '0으로 나누기 (안전)');
+
+    terminal.registerCommand('run_divide_unsafe', async () => {
+        if (currentSession !== 'logic') {
+            terminal.log('먼저 start_session_3()를 실행하세요.', 'error');
+            return;
+        }
+        if (typeof logicCrashSession !== 'undefined') {
+            await logicCrashSession.runDivideUnsafe();
+        }
+    }, '0으로 나누기 (위험!)');
+
+    // 유틸리티
+    terminal.registerCommand('clear', () => {
+        terminal.clear();
+        vizManager.hideAll();
+        currentSession = null;
+    }, '화면 초기화');
+}
+
+// ===== 초기화 =====
+document.addEventListener('DOMContentLoaded', async () => {
+    // 커서 초기화
+    window.customCursor = new CustomCursor();
+
+    // 오디오 초기화 (사용자 제스처 필요 - 클릭 또는 키보드)
+    const initAudio = async () => {
+        if (!audioSystem.initialized) {
+            await audioSystem.init();
+        }
+    };
+    document.addEventListener('click', initAudio, { once: true });
+    document.addEventListener('keydown', initAudio, { once: true });
+
+    // 명령어 등록
+    registerCommands();
+
+    // 시작 메시지
+    await terminal.delay(500);
+    await terminal.typeSequence([
+        { text: 'DE-BUGGING Terminal v1.0', type: 'success' },
+        { text: '"이건 고장 난 게 아닙니다. 아주 크게 웃고 있는 겁니다."', type: 'dim' },
+        '',
+        { text: 'help를 입력하면 명령어 목록을 볼 수 있습니다.', type: 'dim' }
+    ], 400);
 });
 
-// Prevent right-click context menu
+// 우클릭 방지
 document.addEventListener('contextmenu', e => e.preventDefault());
