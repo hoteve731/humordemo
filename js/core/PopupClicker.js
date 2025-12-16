@@ -62,7 +62,7 @@ class PopupClicker {
         this.cursor.innerHTML = `
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87c.48 0 .72-.58.38-.92L6.35 2.86a.5.5 0 0 0-.85.35Z"
-                      fill="#00ff88" stroke="#fff" stroke-width="1"/>
+                      fill="currentColor" stroke="#fff" stroke-width="1"/>
             </svg>
         `;
         this.container.appendChild(this.cursor);
@@ -85,11 +85,18 @@ class PopupClicker {
         }
     }
 
+    // CSS 변수에서 색상 가져오기
+    getThemeColor(varName, fallback) {
+        const style = getComputedStyle(document.body);
+        return style.getPropertyValue(varName).trim() || fallback;
+    }
+
     // 자취 그리기
     drawTrail(fromX, fromY, toX, toY) {
         if (!this.trailCtx) return;
 
-        this.trailCtx.strokeStyle = 'rgba(0, 255, 136, 0.6)';
+        const isLight = document.body.getAttribute('data-theme') === 'light';
+        this.trailCtx.strokeStyle = isLight ? 'rgba(0, 100, 60, 0.7)' : 'rgba(0, 255, 136, 0.6)';
         this.trailCtx.lineWidth = 3;
         this.trailCtx.lineCap = 'round';
 
@@ -342,8 +349,10 @@ class PopupClicker {
         const ctx = this.mazeCtx;
         ctx.clearRect(0, 0, this.mazeCanvas.width, this.mazeCanvas.height);
 
+        const isLight = document.body.getAttribute('data-theme') === 'light';
+
         // 그리드 그리기 (희미하게)
-        ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+        ctx.strokeStyle = isLight ? 'rgba(0, 100, 60, 0.15)' : 'rgba(0, 255, 136, 0.1)';
         ctx.lineWidth = 1;
 
         for (let i = 0; i <= this.gridSize; i++) {
@@ -360,8 +369,8 @@ class PopupClicker {
         }
 
         // 벽 그리기
-        ctx.fillStyle = 'rgba(255, 51, 102, 0.6)';
-        ctx.strokeStyle = '#ff3366';
+        ctx.fillStyle = isLight ? 'rgba(200, 40, 80, 0.5)' : 'rgba(255, 51, 102, 0.6)';
+        ctx.strokeStyle = isLight ? '#c02850' : '#ff3366';
         ctx.lineWidth = 2;
 
         for (const wall of this.walls) {

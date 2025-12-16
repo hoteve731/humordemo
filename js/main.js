@@ -261,8 +261,34 @@ function registerCommands() {
     }, '화면 초기화');
 }
 
+// ===== 테마 토글 =====
+function initThemeToggle() {
+    const toggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme) {
+        document.body.setAttribute('data-theme', savedTheme);
+    }
+
+    toggle.addEventListener('click', () => {
+        const current = document.body.getAttribute('data-theme');
+        const newTheme = current === 'light' ? 'dark' : 'light';
+
+        if (newTheme === 'dark') {
+            document.body.removeAttribute('data-theme');
+        } else {
+            document.body.setAttribute('data-theme', newTheme);
+        }
+
+        localStorage.setItem('theme', newTheme);
+    });
+}
+
 // ===== 초기화 =====
 document.addEventListener('DOMContentLoaded', async () => {
+    // 테마 토글 초기화
+    initThemeToggle();
+
     // 커서 초기화
     window.customCursor = new CustomCursor();
 

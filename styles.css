@@ -24,6 +24,154 @@
     --grid-line-strong: rgba(0, 255, 136, 0.3);
 }
 
+/* Light Mode */
+[data-theme="light"] {
+    --bg-dark: #f5f5f7;
+    --bg-gradient-start: #e8e8ec;
+    --bg-gradient-end: #f5f5f7;
+    --terminal-bg: rgba(255, 255, 255, 0.95);
+    --terminal-text: #007a4d;
+    --terminal-border: rgba(0, 122, 77, 0.3);
+    --viz-bg: rgba(250, 250, 252, 0.95);
+    --viz-border: rgba(0, 150, 200, 0.3);
+    --accent-red: #d92550;
+    --accent-cyan: #0088cc;
+    --accent-green: #007a4d;
+    --accent-purple: #8b5cf6;
+    --accent-yellow: #cc9900;
+    --text-primary: #1a1a1a;
+    --text-secondary: rgba(26, 26, 26, 0.7);
+    --text-muted: rgba(26, 26, 26, 0.4);
+    --grid-line: rgba(0, 122, 77, 0.15);
+    --grid-line-strong: rgba(0, 122, 77, 0.3);
+}
+
+/* ===== LIGHT MODE COMPONENT OVERRIDES ===== */
+/* Session 1: Popup Container */
+[data-theme="light"] #popup-container {
+    background: linear-gradient(135deg, #e8e8f0 0%, #dde0e8 100%);
+}
+
+[data-theme="light"] .fake-popup {
+    background: #ffffff;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .popup-header {
+    background: #f0f0f5;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .popup-title {
+    color: #1a1a1a;
+}
+
+[data-theme="light"] .popup-body {
+    color: #333333;
+}
+
+[data-theme="light"] .math-problem {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
+}
+
+[data-theme="light"] .fake-cursor {
+    filter: drop-shadow(0 0 8px rgba(0, 80, 50, 0.5));
+    color: #006040;
+}
+
+/* Session 2: Predictor */
+[data-theme="light"] #predictor-container {
+    background: #f8f8fa;
+}
+
+[data-theme="light"] #predictor-list {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .predictor-header {
+    background: rgba(0, 122, 77, 0.08);
+}
+
+[data-theme="light"] .predictor-item {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 122, 77, 0.2);
+}
+
+[data-theme="light"] .predictor-item:hover {
+    background: rgba(0, 122, 77, 0.1);
+    border-color: rgba(0, 122, 77, 0.4);
+}
+
+[data-theme="light"] .predictor-item.selected {
+    background: rgba(0, 122, 77, 0.15);
+}
+
+[data-theme="light"] .predictor-index {
+    color: rgba(26, 26, 26, 0.6);
+}
+
+[data-theme="light"] .predictor-word {
+    color: #1a1a1a;
+}
+
+[data-theme="light"] .result-probability.persistent-prob {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 30px rgba(0, 122, 77, 0.2);
+}
+
+[data-theme="light"] .prob-value {
+    text-shadow: 0 0 15px rgba(0, 122, 77, 0.3);
+}
+
+/* Session 3: Code Editor */
+[data-theme="light"] .editor-header {
+    background: rgba(240, 240, 248, 0.95);
+}
+
+[data-theme="light"] #editor-content {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="light"] #editor-output {
+    background: rgba(248, 248, 252, 0.95);
+}
+
+[data-theme="light"] .process-box {
+    background: rgba(240, 240, 248, 0.95);
+}
+
+[data-theme="light"] .deadlock-box {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+[data-theme="light"] #editor-diagram {
+    background: rgba(248, 248, 252, 0.95);
+}
+
+/* Custom Cursor Light Mode */
+[data-theme="light"] #custom-cursor {
+    mix-blend-mode: multiply;
+}
+
+[data-theme="light"] .cursor-dot {
+    background: #1a1a1a;
+}
+
+[data-theme="light"] .cursor-ring {
+    border-color: rgba(26, 26, 26, 0.6);
+}
+
+/* Panel Shadows for Light Mode */
+[data-theme="light"] #terminal-panel {
+    box-shadow: 0 4px 30px rgba(0, 122, 77, 0.1);
+}
+
+[data-theme="light"] #viz-panel {
+    box-shadow: 0 4px 30px rgba(0, 136, 204, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -234,6 +382,7 @@ body {
     z-index: 100;
     transition: none;
     filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.6));
+    color: #00ff88;
 }
 
 .fake-cursor.clicking {
@@ -1421,6 +1570,59 @@ body {
 @keyframes zenoApproach {
     0% { transform: translateX(0); }
     100% { transform: translateX(1px); }
+}
+
+/* ===== THEME TOGGLE BUTTON ===== */
+#theme-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--terminal-border);
+    background: var(--terminal-bg);
+    color: var(--terminal-text);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer !important;
+    z-index: 10000;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent-cyan);
+}
+
+#theme-toggle .icon-sun,
+#theme-toggle .icon-moon {
+    position: absolute;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#theme-toggle .icon-sun {
+    opacity: 0;
+    transform: rotate(-90deg);
+}
+
+#theme-toggle .icon-moon {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+[data-theme="light"] #theme-toggle .icon-sun {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+[data-theme="light"] #theme-toggle .icon-moon {
+    opacity: 0;
+    transform: rotate(90deg);
 }
 
 /* ===== RESPONSIVE ===== */
